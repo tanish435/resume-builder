@@ -1,0 +1,248 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER MODEL
+// ============================================
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String?   // Hashed password
+  image         String?   // Profile picture URL
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  resumes       Resume[]
+  accounts      Account[]
+  sessions      Session[]
+
+  @@map("users")
+}
+
+// NextAuth.js models for authentication
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// ============================================
+// RESUME MODEL
+// ============================================
+model Resume {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String   @default("Untitled Resume")
+  templateId  String   @default("modern")
+  
+  // Styling configuration stored as JSON
+  styleConfig Json     @default("{\"primaryColor\":\"#2563eb\",\"fontFamily\":\"Inter\",\"fontSize\":14,\"lineHeight\":1.5,\"spacing\":\"normal\"}")
+  
+  // Metadata
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lastEditedAt DateTime @default(now())
+
+  // Relations
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sections      Section[]
+  versions      ResumeVersion[]
+  shareLinks    ShareLink[]
+  template      Template        @relation(fields: [templateId], references: [id])
+
+  @@index([userId])
+  @@index([templateId])
+  @@index([updatedAt])
+  @@map("resumes")
+}
+
+// ============================================
+// RESUME VERSION MODEL (for Undo/Redo)
+// ============================================
+model ResumeVersion {
+  id        String   @id @default(cuid())
+  resumeId  String
+  
+  // Snapshot of entire resume state
+  data      Json     // Contains sections, styleConfig, templateId, etc.
+  
+  // Version metadata
+  version   Int      // Sequential version number
+  action    String?  // Description of action (e.g., "Added Experience Section")
+  createdAt DateTime @default(now())
+
+  // Relations
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  @@index([resumeId, version])
+  @@index([createdAt])
+  @@map("resume_versions")
+}
+
+// ============================================
+// SECTION MODEL (Polymorphic Design)
+// ============================================
+model Section {
+  id         String   @id @default(cuid())
+  resumeId   String
+  
+  // Section type (personal, experience, education, skills, custom, etc.)
+  type       SectionType
+  
+  // Flexible JSON data to store different section structures
+  data       Json
+  
+  // Section ordering and visibility
+  order      Int      @default(0)
+  isVisible  Boolean  @default(true)
+  
+  // Metadata
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  @@index([resumeId, order])
+  @@index([type])
+  @@map("sections")
+}
+
+// Enum for section types
+enum SectionType {
+  PERSONAL_INFO
+  SUMMARY
+  EXPERIENCE
+  EDUCATION
+  SKILLS
+  PROJECTS
+  CERTIFICATIONS
+  LANGUAGES
+  INTERESTS
+  CUSTOM
+}
+
+// ============================================
+// TEMPLATE MODEL
+// ============================================
+model Template {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  displayName String   // User-friendly name
+  description String?
+  
+  // Template configuration
+  structure   Json     // Layout configuration (columns, sections, etc.)
+  preview     String?  // Preview image URL
+  
+  // Template metadata
+  category    String   @default("professional") // professional, creative, minimal, modern
+  isPremium   Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  
+  // Usage statistics
+  usageCount  Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  resumes Resume[]
+
+  @@index([category])
+  @@index([isActive])
+  @@map("templates")
+}
+
+// ============================================
+// SHARE LINK MODEL
+// ============================================
+model ShareLink {
+  id         String    @id @default(cuid())
+  resumeId   String
+  
+  // Unique slug for public URL
+  slug       String    @unique
+  
+  // Access control
+  isActive   Boolean   @default(true)
+  password   String?   // Optional password protection (hashed)
+  expiresAt  DateTime? // Optional expiration
+  
+  // Analytics
+  viewCount  Int       @default(0)
+  lastViewedAt DateTime?
+  
+  // Metadata
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // Relations
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  @@index([slug])
+  @@index([resumeId])
+  @@index([expiresAt])
+  @@map("share_links")
+}
+
+// ============================================
+// STYLE PRESET MODEL (Optional - for saved themes)
+// ============================================
+model StylePreset {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  
+  // Style configuration
+  config      Json     // Same structure as Resume.styleConfig
+  
+  // Metadata
+  isDefault   Boolean  @default(false)
+  isPublic    Boolean  @default(false)
+  usageCount  Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isDefault])
+  @@index([isPublic])
+  @@map("style_presets")
+}
