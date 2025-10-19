@@ -1,120 +1,64 @@
 'use client';
 
-import { Resume, Section, StyleConfig, SectionType } from '@/types/schema';
-import SectionWrapper from '../resume/SectionWrapper';
-import PersonalInfoSection from '../resume/sections/PersonalInfoSection';
-import SkillsSection from '../resume/sections/SkillsSection';
-import ProjectsSection from '../resume/sections/ProjectsSection';
-import CertificationsSection from '../resume/sections/CertificationsSection';
-import LanguagesSection from '../resume/sections/LanguagesSection';
-import InterestsSection from '../resume/sections/InterestsSection';
-import CustomSection from '../resume/sections/CustomSection';
-import EducationSection from '../resume/sections/EducationSection';
-import ExperienceSection from '../resume/sections/ExperienceSection';
-import SummarySection from '../resume/sections/SummarySection';
-// import SummarySection from '../resume/sections/SummarySection';
-// import ExperienceSection from '../resume/sections/ExperienceSection';
-// import EducationSection from '../resume/sections/EducationSection';
-// import SkillsSection from '../resume/sections/SkillsSection';
-// import ProjectsSection from '../resume/sections/ProjectsSection';
-// import CertificationsSection from '../resume/sections/CertificationsSection';
-// import LanguagesSection from '../resume/sections/LanguagesSection';
-// import InterestsSection from '../resume/sections/InterestsSection';
-// import CustomSection from '../resume/sections/CustomSection';
-
-interface ModernTemplateProps {
-  resume: Resume;
-  sections: Section[];
-  style: StyleConfig;
-}
+import { Resume, Section, StyleConfig } from '@/types/schema';
+import { BaseTemplateUtils, TemplateProps } from './BaseTemplate';
 
 /**
  * Modern Template - Single Column Layout
  * Clean, professional design with emphasis on content hierarchy
+ * 
+ * Layout: Single column, full width
+ * Style: Minimalist, clean lines, emphasis on typography
+ * Best For: Tech professionals, software engineers, designers
  */
-export default function ModernTemplate({ resume, sections, style }: ModernTemplateProps) {
-  // Sort sections by order
-  const sortedSections = [...sections].sort((a, b) => a.order - b.order);
+export default function ModernTemplate({ resume, sections, style }: TemplateProps) {
+  // Sort and filter visible sections
+  const sortedSections = BaseTemplateUtils.sortSections(
+    BaseTemplateUtils.getVisibleSections(sections)
+  );
 
   // Get spacing based on style config
-  const spacing = {
-    compact: 'space-y-4',
-    normal: 'space-y-6',
-    relaxed: 'space-y-8',
-  }[style.spacing || 'normal'];
+  const spacing = BaseTemplateUtils.getSpacingClass(style.spacing);
+
+  // Personal info section (header)
+  const personalInfoSection = sortedSections.find(
+    (s) => s.type === 'PERSONAL_INFO'
+  );
+
+  // Other sections
+  const contentSections = sortedSections.filter(
+    (s) => s.type !== 'PERSONAL_INFO'
+  );
 
   return (
     <div
-      className="modern-template w-full h-full"
-      style={{
-        fontFamily: style.fontFamily,
-        fontSize: `${style.fontSize}px`,
-        lineHeight: style.lineHeight,
-        color: style.textColor || '#000000',
-        backgroundColor: style.backgroundColor || '#ffffff',
-      }}
+      className="modern-template w-full min-h-screen"
+      style={BaseTemplateUtils.getContainerStyles(style)}
     >
       {/* Template Container */}
-      <div className={`p-12 ${spacing}`}>
-        {/* Render sections dynamically */}
-        {sortedSections.map((section) => (
-          <SectionWrapper
-            key={section.id}
-            sectionId={section.id}
-            sectionType={section.type}
-            isVisible={section.isVisible}
-          >
-            {renderSection(section, style)}
-          </SectionWrapper>
-        ))}
-
-        {/* Empty State */}
-        {sortedSections.length === 0 && (
-          <div className="text-center py-20 text-gray-400">
-            <p className="text-lg">No sections added yet</p>
-            <p className="text-sm mt-2">Add sections from the sidebar to get started</p>
+      <div className={`px-12 py-16 max-w-4xl mx-auto ${spacing}`}>
+        {/* Header Section - Personal Info */}
+        {personalInfoSection && (
+          <div className="header-section mb-10">
+            {BaseTemplateUtils.renderWrappedSection(personalInfoSection, style)}
           </div>
         )}
+
+        {/* Main Content Sections */}
+        <div className={`main-content ${spacing}`}>
+          {contentSections.length > 0 ? (
+            contentSections.map((section) => 
+              BaseTemplateUtils.renderWrappedSection(section, style)
+            )
+          ) : !personalInfoSection ? (
+            BaseTemplateUtils.renderEmptyState()
+          ) : (
+            <div className="text-center text-gray-400 py-8">
+              <p className="text-sm">Add more sections to complete your resume</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
-}
-
-/**
- * Render appropriate section component based on type
- */
-function renderSection(section: Section, style: StyleConfig) {
-  const sectionProps = {
-    section,
-    style,
-  };
-
-  switch (section.type) {
-    case SectionType.PERSONAL_INFO:
-      return <PersonalInfoSection {...sectionProps} />;
-    case SectionType.SUMMARY:
-      return <SummarySection {...sectionProps} />;
-    case SectionType.EXPERIENCE:
-      return <ExperienceSection {...sectionProps} />;
-    case SectionType.EDUCATION:
-      return <EducationSection {...sectionProps} />;
-    case SectionType.SKILLS:
-      return <SkillsSection {...sectionProps} />;
-    case SectionType.PROJECTS:
-      return <ProjectsSection {...sectionProps} />;
-    case SectionType.CERTIFICATIONS:
-      return <CertificationsSection {...sectionProps} />;
-    case SectionType.LANGUAGES:
-      return <LanguagesSection {...sectionProps} />;
-    case SectionType.INTERESTS:
-      return <InterestsSection {...sectionProps} />;
-    case SectionType.CUSTOM:
-      return <CustomSection {...sectionProps} />;
-    default:
-      return (
-        <div className="text-red-500 p-4 border border-red-300 rounded">
-          Unknown section type: {section.type}
-        </div>
-      );
-  }
 }
