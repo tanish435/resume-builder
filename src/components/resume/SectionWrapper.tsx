@@ -89,7 +89,7 @@ export default function SectionWrapper({
       )}
 
       {/* Section Content */}
-      <div className={isActive ? 'pointer-events-auto' : 'pointer-events-none'}>
+      <div className="pointer-events-auto">
         {children}
       </div>
 

@@ -45,7 +45,7 @@ export default function ModernTemplate({ resume, sections, style }: ModernTempla
 
   return (
     <div
-      className="modern-template w-full h-full overflow-hidden"
+      className="modern-template w-full h-full"
       style={{
         fontFamily: style.fontFamily,
         fontSize: `${style.fontSize}px`,

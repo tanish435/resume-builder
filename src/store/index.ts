@@ -27,9 +27,10 @@ export const store = configureStore({
         ignoredPaths: ['history.past', 'history.future'],
       },
     })
-      .concat(historyMiddleware)
-      .concat(autoSaveMiddleware)
-      .concat(apiSyncMiddleware),
+      .concat(historyMiddleware),
+      // Temporarily disabled until API is built
+      // .concat(autoSaveMiddleware)
+      // .concat(apiSyncMiddleware),
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

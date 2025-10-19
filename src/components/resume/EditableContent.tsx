@@ -102,31 +102,45 @@ export default function EditableContent({
       // Parse the field path to update the correct nested property
       const pathParts = fieldPath.split('.');
       
-      if (pathParts[0] === 'data' && pathParts.length === 2) {
-        // Simple field like "data.fullName"
-        const fieldName = pathParts[1];
+      // Get the current section
+      const currentSection = sections.find((s) => s.id === sectionId);
+      if (!currentSection) return;
+
+      // Clone the section data deeply
+      const updatedData = JSON.parse(JSON.stringify(currentSection.data));
+      
+      // Navigate through the path and update the value
+      if (pathParts[0] === 'data') {
+        let target = updatedData;
         
-        // Get the current section
-        const currentSection = sections.find((s) => s.id === sectionId);
-        
-        if (currentSection) {
-          // Update the section with new data
-          dispatch(updateSection({
-            id: sectionId,
-            data: {
-              ...currentSection,
-              data: {
-                ...currentSection.data,
-                [fieldName]: newValue
-              }
-            }
-          }));
+        // Navigate to the parent of the field to update
+        for (let i = 1; i < pathParts.length - 1; i++) {
+          const part = pathParts[i];
           
-          console.log('✅ Successfully saved to Redux!');
+          // Handle array indices like "entries[0]"
+          const arrayMatch = part.match(/^(\w+)\[(\d+)\]$/);
+          if (arrayMatch) {
+            const [, arrayName, index] = arrayMatch;
+            target = target[arrayName][parseInt(index)];
+          } else {
+            target = target[part];
+          }
         }
-      } else {
-        // For complex paths, we'll implement this in Phase 4.2
-        console.log('Complex path update - will be implemented in Phase 4.2');
+        
+        // Set the final value
+        const finalKey = pathParts[pathParts.length - 1];
+        target[finalKey] = newValue;
+        
+        // Dispatch update
+        dispatch(updateSection({
+          id: sectionId,
+          data: {
+            ...currentSection,
+            data: updatedData
+          }
+        }));
+        
+        console.log('✅ Successfully saved to Redux!');
       }
     }
   };
