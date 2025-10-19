@@ -6,7 +6,8 @@ import { setResume } from '@/store/slices/resumeSlice';
 import { setActiveTemplate } from '@/store/slices/templateSlice';
 import { setStyle } from '@/store/slices/styleSlice';
 import ResumeCanvas from '@/components/resume/ResumeCanvas';
-import { Resume, Section, SectionType, PersonalInfoData, SummaryData } from '@/types/schema';
+import EditorPanel from '@/components/editor/EditorPanel';
+import { Resume, Section, SectionType, PersonalInfoData, SummaryData, ExperienceData, EducationData } from '@/types/schema';
 
 export default function Home() {
   const dispatch = useAppDispatch();
@@ -67,6 +68,56 @@ export default function Home() {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
+      {
+        id: 'section-3',
+        resumeId: 'sample-resume-1',
+        type: SectionType.EXPERIENCE,
+        data: {
+          entries: [
+            {
+              id: 'exp-1',
+              company: 'Tech Corp',
+              position: 'Senior Software Engineer',
+              location: 'San Francisco, CA',
+              startDate: '01/2020',
+              endDate: null,
+              description: 'Leading development of cloud-based applications',
+              highlights: ['Built scalable microservices', 'Improved performance by 40%'],
+              technologies: ['React', 'Node.js', 'AWS'],
+            },
+          ],
+        } as ExperienceData,
+        order: 2,
+        isVisible: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 'section-4',
+        resumeId: 'sample-resume-1',
+        type: SectionType.EDUCATION,
+        data: {
+          entries: [
+            {
+              id: 'edu-1',
+              institution: 'University of California',
+              degree: 'Bachelor of Science',
+              field: 'Computer Science',
+              location: 'Berkeley, CA',
+              startDate: '2015',
+              endDate: '2019',
+              gpa: '3.8',
+              honors: 'Cum Laude',
+              description: undefined,
+              highlights: [],
+            },
+          ],
+        } as EducationData,
+        order: 3,
+        isVisible: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     ];
 
     // Dispatch to Redux store
@@ -76,8 +127,14 @@ export default function Home() {
   }, [dispatch]);
 
   return (
-    <div className="w-full h-screen">
-      <ResumeCanvas />
+    <div className="flex w-full h-screen">
+      {/* Left Sidebar - Editor Panel */}
+      <EditorPanel />
+
+      {/* Main Content - Resume Canvas */}
+      <div className="flex-1">
+        <ResumeCanvas />
+      </div>
     </div>
   );
 }

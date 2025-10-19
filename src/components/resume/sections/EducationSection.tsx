@@ -1,8 +1,10 @@
 'use client';
 
-import { Section, StyleConfig, EducationData } from '@/types/schema';
+import { Section, StyleConfig, EducationData, EducationEntry } from '@/types/schema';
 import EditableContent from '../EditableContent';
-import { GraduationCap, MapPin, Calendar } from 'lucide-react';
+import { GraduationCap, MapPin, Calendar, Plus, Trash2 } from 'lucide-react';
+import { useAppDispatch } from '@/store/hooks';
+import { updateSection } from '@/store/slices/resumeSlice';
 
 interface EducationSectionProps {
   section: Section;
@@ -11,34 +13,105 @@ interface EducationSectionProps {
 
 /**
  * Education Section Component
- * Displays education entries
+ * Displays education entries with add/delete functionality
  */
 export default function EducationSection({ section, style }: EducationSectionProps) {
+  const dispatch = useAppDispatch();
   const data = section.data as EducationData;
+
+  const handleAddEntry = () => {
+    const newEntry: EducationEntry = {
+      id: `edu-${Date.now()}`,
+      institution: 'University Name',
+      degree: 'Degree Type',
+      field: 'Major/Field of Study',
+      location: 'City, Country',
+      startDate: 'YYYY',
+      endDate: undefined,
+      gpa: undefined,
+      honors: undefined,
+      description: undefined,
+      highlights: [],
+    };
+
+    const updatedData = {
+      ...data,
+      entries: [...(data.entries || []), newEntry],
+    };
+
+    dispatch(updateSection({
+      id: section.id,
+      data: {
+        ...section,
+        data: updatedData,
+      },
+    }));
+  };
+
+  const handleDeleteEntry = (entryId: string) => {
+    const updatedData = {
+      ...data,
+      entries: data.entries.filter((entry) => entry.id !== entryId),
+    };
+
+    dispatch(updateSection({
+      id: section.id,
+      data: {
+        ...section,
+        data: updatedData,
+      },
+    }));
+  };
 
   return (
     <div className="education-section">
-      {/* Section Title */}
-      <h2
-        className="text-2xl font-bold mb-4 pb-2 border-b-2 flex items-center gap-2"
-        style={{ color: style.primaryColor, borderColor: style.primaryColor }}
-      >
-        <GraduationCap className="w-6 h-6" />
-        Education
-      </h2>
+      {/* Section Title with Add Button */}
+      <div className="flex justify-between items-center mb-4">
+        <h2
+          className="text-2xl font-bold pb-2 border-b-2 flex items-center gap-2 flex-1"
+          style={{ color: style.primaryColor, borderColor: style.primaryColor }}
+        >
+          <GraduationCap className="w-6 h-6" />
+          Education
+        </h2>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAddEntry();
+          }}
+          className="no-print flex items-center gap-1 px-3 py-1 text-sm rounded hover:bg-blue-100 transition-colors"
+          style={{ color: style.primaryColor }}
+          title="Add Education"
+        >
+          <Plus className="w-4 h-4" />
+          Add
+        </button>
+      </div>
 
       {/* Education Entries */}
       <div className="space-y-5">
         {data.entries && data.entries.length > 0 ? (
-          data.entries.map((entry) => (
-            <div key={entry.id} className="education-entry">
+          data.entries.map((entry, index) => (
+            <div key={entry.id} className="education-entry relative group">
+              {/* Delete Button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteEntry(entry.id);
+                }}
+                className="no-print absolute -right-2 -top-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                title="Delete Entry"
+              >
+                <Trash2 className="w-3 h-3" />
+              </button>
+
               {/* Header Row */}
               <div className="flex justify-between items-start mb-2">
                 <div className="flex-1">
                   {/* Degree */}
                   <EditableContent
                     sectionId={section.id}
-                    fieldPath={`data.entries[${entry.id}].degree`}
+                    fieldPath={`data.entries[${index}].degree`}
                     value={entry.degree}
                     placeholder="Degree Title"
                     as="h3"
@@ -48,7 +121,7 @@ export default function EducationSection({ section, style }: EducationSectionPro
                   {/* Institution */}
                   <EditableContent
                     sectionId={section.id}
-                    fieldPath={`data.entries[${entry.id}].institution`}
+                    fieldPath={`data.entries[${index}].institution`}
                     value={entry.institution}
                     placeholder="Institution Name"
                     as="p"
@@ -57,16 +130,39 @@ export default function EducationSection({ section, style }: EducationSectionPro
 
                   {/* Field of Study */}
                   {entry.field && (
-                    <p className="text-gray-600 text-sm">Field: {entry.field}</p>
+                    <div className="flex items-baseline gap-1 text-sm text-gray-600">
+                      <span>Field:</span>
+                      <EditableContent
+                        sectionId={section.id}
+                        fieldPath={`data.entries[${index}].field`}
+                        value={entry.field}
+                        placeholder="Major/Field"
+                        as="span"
+                      />
+                    </div>
                   )}
                 </div>
 
                 {/* Dates */}
                 <div className="text-sm text-gray-600 flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
-                  <span>
-                    {entry.startDate} - {entry.endDate || 'Present'}
-                  </span>
+                  <EditableContent
+                    sectionId={section.id}
+                    fieldPath={`data.entries[${index}].startDate`}
+                    value={entry.startDate}
+                    placeholder="YYYY"
+                    as="span"
+                    className="inline-block"
+                  />
+                  <span> - </span>
+                  <EditableContent
+                    sectionId={section.id}
+                    fieldPath={`data.entries[${index}].endDate`}
+                    value={entry.endDate || 'Present'}
+                    placeholder="Present"
+                    as="span"
+                    className="inline-block"
+                  />
                 </div>
               </div>
 
@@ -74,27 +170,55 @@ export default function EducationSection({ section, style }: EducationSectionPro
               {entry.location && (
                 <div className="flex items-center gap-1 text-sm text-gray-600 mb-2">
                   <MapPin className="w-4 h-4" />
-                  <span>{entry.location}</span>
+                  <EditableContent
+                    sectionId={section.id}
+                    fieldPath={`data.entries[${index}].location`}
+                    value={entry.location}
+                    placeholder="City, Country"
+                    as="span"
+                  />
                 </div>
               )}
 
               {/* GPA */}
               {entry.gpa && (
                 <p className="text-sm text-gray-700">
-                  <span className="font-medium">GPA:</span> {entry.gpa}
+                  <span className="font-medium">GPA:</span>{' '}
+                  <EditableContent
+                    sectionId={section.id}
+                    fieldPath={`data.entries[${index}].gpa`}
+                    value={entry.gpa}
+                    placeholder="4.0"
+                    as="span"
+                  />
                 </p>
               )}
 
               {/* Honors */}
               {entry.honors && (
                 <p className="text-sm text-gray-700">
-                  <span className="font-medium">Honors:</span> {entry.honors}
+                  <span className="font-medium">Honors:</span>{' '}
+                  <EditableContent
+                    sectionId={section.id}
+                    fieldPath={`data.entries[${index}].honors`}
+                    value={entry.honors}
+                    placeholder="Dean's List, Cum Laude"
+                    as="span"
+                  />
                 </p>
               )}
 
               {/* Description */}
               {entry.description && (
-                <p className="text-gray-700 mt-2">{entry.description}</p>
+                <EditableContent
+                  sectionId={section.id}
+                  fieldPath={`data.entries[${index}].description`}
+                  value={entry.description}
+                  placeholder="Education description..."
+                  multiline
+                  as="p"
+                  className="text-gray-700 mt-2"
+                />
               )}
 
               {/* Highlights */}
@@ -108,7 +232,20 @@ export default function EducationSection({ section, style }: EducationSectionPro
             </div>
           ))
         ) : (
-          <p className="text-gray-400 italic">No education entries added yet</p>
+          <div className="text-center py-8">
+            <p className="text-gray-400 italic mb-3">No education entries added yet</p>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAddEntry();
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-blue-100 transition-colors"
+              style={{ color: style.primaryColor }}
+            >
+              <Plus className="w-4 h-4" />
+              Add Your First Education
+            </button>
+          </div>
         )}
       </div>
     </div>

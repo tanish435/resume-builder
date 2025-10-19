@@ -1,7 +1,10 @@
 'use client';
 
-import { Section, StyleConfig, SkillsData } from '@/types/schema';
-import { Wrench } from 'lucide-react';
+import { Section, StyleConfig, SkillsData, SkillCategory } from '@/types/schema';
+import { Wrench, Plus, Trash2 } from 'lucide-react';
+import EditableContent from '../EditableContent';
+import { useAppDispatch } from '@/store/hooks';
+import { updateSection } from '@/store/slices/resumeSlice';
 
 interface SkillsSectionProps {
   section: Section;
@@ -10,29 +13,99 @@ interface SkillsSectionProps {
 
 /**
  * Skills Section Component
- * Displays skills organized by categories
+ * Displays skills organized by categories with add/delete functionality
  */
 export default function SkillsSection({ section, style }: SkillsSectionProps) {
+  const dispatch = useAppDispatch();
   const data = section.data as SkillsData;
+
+  const handleAddCategory = () => {
+    const newCategory: SkillCategory = {
+      id: `cat-${Date.now()}`,
+      name: 'New Category',
+      skills: [],
+    };
+
+    const updatedData = {
+      ...data,
+      categories: [...(data.categories || []), newCategory],
+    };
+
+    dispatch(updateSection({
+      id: section.id,
+      data: {
+        ...section,
+        data: updatedData,
+      },
+    }));
+  };
+
+  const handleDeleteCategory = (categoryId: string) => {
+    const updatedData = {
+      ...data,
+      categories: data.categories?.filter((cat) => cat.id !== categoryId),
+    };
+
+    dispatch(updateSection({
+      id: section.id,
+      data: {
+        ...section,
+        data: updatedData,
+      },
+    }));
+  };
 
   return (
     <div className="skills-section">
-      {/* Section Title */}
-      <h2
-        className="text-2xl font-bold mb-4 pb-2 border-b-2 flex items-center gap-2"
-        style={{ color: style.primaryColor, borderColor: style.primaryColor }}
-      >
-        <Wrench className="w-6 h-6" />
-        Skills
-      </h2>
+      {/* Section Title with Add Button */}
+      <div className="flex justify-between items-center mb-4">
+        <h2
+          className="text-2xl font-bold pb-2 border-b-2 flex items-center gap-2 flex-1"
+          style={{ color: style.primaryColor, borderColor: style.primaryColor }}
+        >
+          <Wrench className="w-6 h-6" />
+          Skills
+        </h2>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAddCategory();
+          }}
+          className="no-print flex items-center gap-1 px-3 py-1 text-sm rounded hover:bg-blue-100 transition-colors"
+          style={{ color: style.primaryColor }}
+          title="Add Category"
+        >
+          <Plus className="w-4 h-4" />
+          Add
+        </button>
+      </div>
 
       {/* Skills by Category */}
       {data.categories && data.categories.length > 0 ? (
         <div className="space-y-4">
-          {data.categories.map((category) => (
-            <div key={category.id} className="skill-category">
+          {data.categories.map((category, index) => (
+            <div key={category.id} className="skill-category relative group">
+              {/* Delete Button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteCategory(category.id);
+                }}
+                className="no-print absolute -right-2 -top-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-10"
+                title="Delete Category"
+              >
+                <Trash2 className="w-3 h-3" />
+              </button>
+
               {/* Category Name */}
-              <h3 className="font-semibold text-gray-800 mb-2">{category.name}</h3>
+              <EditableContent
+                sectionId={section.id}
+                fieldPath={`data.categories[${index}].name`}
+                value={category.name}
+                placeholder="Category Name"
+                as="h3"
+                className="font-semibold text-gray-800 mb-2"
+              />
 
               {/* Skills */}
               <div className="flex flex-wrap gap-2">
@@ -71,7 +144,20 @@ export default function SkillsSection({ section, style }: SkillsSectionProps) {
           ))}
         </div>
       ) : (
-        <p className="text-gray-400 italic">No skills added yet</p>
+        <div className="text-center py-8">
+          <p className="text-gray-400 italic mb-3">No skills added yet</p>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleAddCategory();
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-blue-100 transition-colors"
+            style={{ color: style.primaryColor }}
+          >
+            <Plus className="w-4 h-4" />
+            Add Your First Skill Category
+          </button>
+        </div>
       )}
     </div>
   );
