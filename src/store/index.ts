@@ -6,6 +6,7 @@ import styleReducer from './slices/styleSlice';
 import templateReducer from './slices/templateSlice';
 import { historyMiddleware } from './middleware/historyMiddleware';
 import { autoSaveMiddleware } from './middleware/autoSaveMiddleware';
+import { apiSyncMiddleware } from './middleware/apiSyncMiddleware';
 
 export const store = configureStore({
   reducer: {
@@ -27,7 +28,8 @@ export const store = configureStore({
       },
     })
       .concat(historyMiddleware)
-      .concat(autoSaveMiddleware),
+      .concat(autoSaveMiddleware)
+      .concat(apiSyncMiddleware),
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
