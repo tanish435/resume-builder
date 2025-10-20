@@ -47,9 +47,7 @@ export default function ModernTemplate({ resume, sections, style }: TemplateProp
         {/* Main Content Sections */}
         <div className={`main-content ${spacing}`}>
           {contentSections.length > 0 ? (
-            contentSections.map((section) => 
-              BaseTemplateUtils.renderWrappedSection(section, style)
-            )
+            BaseTemplateUtils.renderSectionsWithDividers(contentSections, style)
           ) : !personalInfoSection ? (
             BaseTemplateUtils.renderEmptyState()
           ) : (

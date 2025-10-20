@@ -1,288 +1,220 @@
 'use client';
 
+import { useState } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { 
-  setStyle, 
-  updatePrimaryColor, 
+  updatePrimaryColor,
+  updateSecondaryColor,
   updateTextColor, 
   updateBackgroundColor,
+  updateAccentColor,
   updateFontFamily,
   updateFontSize,
   updateLineHeight,
-  updateSpacing
+  updateSpacing,
+  updateBorderStyle,
+  updateBorderColor,
+  resetStyle,
 } from '@/store/slices/styleSlice';
-import { Palette, Type, Maximize2 } from 'lucide-react';
+import ColorPicker from '@/components/ui/ColorPicker';
+import FontSelector from '@/components/ui/FontSelector';
+import SpacingControls from '@/components/ui/SpacingControls';
+import BorderStyler from '@/components/ui/BorderStyler';
+import { Palette, Type, Maximize2, Minus, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
 
 /**
- * Style Customizer Component
- * Customize colors, fonts, spacing, and other style properties
+ * Style Customizer Component - Phase 6.1
+ * Comprehensive style customization with:
+ * - Advanced color picker with presets
+ * - Google Fonts integration
+ * - Spacing controls
+ * - Border/divider styling
  */
 export default function StyleCustomizer() {
   const dispatch = useAppDispatch();
   const { currentStyle } = useAppSelector((state) => state.style);
 
-  const handleColorChange = (property: 'primaryColor' | 'textColor' | 'backgroundColor', value: string) => {
-    if (property === 'primaryColor') {
-      dispatch(updatePrimaryColor(value));
-    } else if (property === 'textColor') {
-      dispatch(updateTextColor(value));
-    } else {
-      dispatch(updateBackgroundColor(value));
-    }
+  // Collapsible sections state
+  const [expandedSections, setExpandedSections] = useState({
+    colors: true,
+    typography: false,
+    spacing: false,
+    borders: false,
+  });
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
   };
 
-  const handleFontChange = (value: string) => {
-    dispatch(updateFontFamily(value));
-  };
-
-  const handleFontSizeChange = (value: number) => {
-    dispatch(updateFontSize(value));
-  };
-
-  const handleLineHeightChange = (value: number) => {
-    dispatch(updateLineHeight(value));
-  };
-
-  const handleSpacingChange = (value: 'compact' | 'normal' | 'relaxed') => {
-    dispatch(updateSpacing(value));
-  };
-
-  const fontOptions = [
-    { value: 'Inter, sans-serif', label: 'Inter (Modern)' },
-    { value: 'Georgia, serif', label: 'Georgia (Classic)' },
-    { value: 'Arial, sans-serif', label: 'Arial (Simple)' },
-    { value: '"Times New Roman", serif', label: 'Times New Roman (Traditional)' },
-    { value: '"Courier New", monospace', label: 'Courier New (Monospace)' },
-    { value: 'Helvetica, sans-serif', label: 'Helvetica (Clean)' },
-  ];
-
-  const presetColors = [
-    { name: 'Blue', primary: '#2563eb', text: '#1f2937', bg: '#ffffff' },
-    { name: 'Green', primary: '#059669', text: '#1f2937', bg: '#ffffff' },
-    { name: 'Purple', primary: '#7c3aed', text: '#1f2937', bg: '#ffffff' },
-    { name: 'Red', primary: '#dc2626', text: '#1f2937', bg: '#ffffff' },
-    { name: 'Orange', primary: '#ea580c', text: '#1f2937', bg: '#ffffff' },
-    { name: 'Teal', primary: '#0d9488', text: '#1f2937', bg: '#ffffff' },
-    { name: 'Dark', primary: '#1f2937', text: '#000000', bg: '#ffffff' },
-    { name: 'Navy', primary: '#1e40af', text: '#1f2937', bg: '#ffffff' },
+  // Section configuration
+  const sections = [
+    {
+      id: 'colors' as const,
+      title: 'Colors',
+      icon: Palette,
+      description: 'Customize color scheme',
+    },
+    {
+      id: 'typography' as const,
+      title: 'Typography',
+      icon: Type,
+      description: 'Fonts and text styling',
+    },
+    {
+      id: 'spacing' as const,
+      title: 'Spacing & Layout',
+      icon: Maximize2,
+      description: 'Control spacing and density',
+    },
+    {
+      id: 'borders' as const,
+      title: 'Borders & Dividers',
+      icon: Minus,
+      description: 'Section divider styling',
+    },
   ];
 
   return (
-    <div className="style-customizer space-y-6">
+    <div className="style-customizer h-full flex flex-col">
       {/* Header */}
-      <div>
+      <div className="p-4 border-b border-gray-200 bg-white">
         <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-          <Palette className="w-5 h-5" />
-          Style Customizer
+          <Palette className="w-5 h-5 text-blue-600" />
+          Design Customization
         </h3>
-        <p className="text-xs text-gray-500 mt-1">Customize colors, fonts, and layout</p>
+        <p className="text-xs text-gray-500 mt-1">
+          Personalize your resume appearance
+        </p>
       </div>
 
-      {/* Color Presets */}
-      <div className="space-y-3">
-        <label className="text-sm font-medium text-gray-700">Color Presets</label>
-        <div className="grid grid-cols-4 gap-2">
-          {presetColors.map((preset) => (
-            <button
-              key={preset.name}
-              onClick={() => {
-                dispatch(setStyle({
-                  ...currentStyle,
-                  primaryColor: preset.primary,
-                  textColor: preset.text,
-                  backgroundColor: preset.bg,
-                }));
-              }}
-              className="group relative h-12 rounded-lg border-2 transition-all hover:scale-105"
-              style={{
-                backgroundColor: preset.bg,
-                borderColor: currentStyle.primaryColor === preset.primary ? preset.primary : '#e5e7eb',
-              }}
-              title={preset.name}
-            >
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar">
+        <div className="p-4 space-y-3">
+          {sections.map((section) => {
+            const Icon = section.icon;
+            const isExpanded = expandedSections[section.id];
+
+            return (
               <div
-                className="absolute inset-0 rounded-lg opacity-70"
-                style={{ backgroundColor: preset.primary }}
-              />
-              <span className="relative text-xs font-medium text-white drop-shadow">
-                {preset.name}
-              </span>
-            </button>
-          ))}
+                key={section.id}
+                className="border border-gray-200 rounded-lg overflow-hidden bg-white"
+              >
+                {/* Section Header */}
+                <button
+                  onClick={() => toggleSection(section.id)}
+                  className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon className="w-5 h-5 text-gray-600" />
+                    <div className="text-left">
+                      <h4 className="text-sm font-semibold text-gray-900">
+                        {section.title}
+                      </h4>
+                      <p className="text-xs text-gray-500">
+                        {section.description}
+                      </p>
+                    </div>
+                  </div>
+                  {isExpanded ? (
+                    <ChevronUp className="w-5 h-5 text-gray-400" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                  )}
+                </button>
+
+                {/* Section Content */}
+                {isExpanded && (
+                  <div className="p-4 pt-0 border-t border-gray-100 animate-fade-in">
+                    {section.id === 'colors' && (
+                      <div className="space-y-4 pt-4">
+                        <ColorPicker
+                          label="Primary Color"
+                          value={currentStyle.primaryColor}
+                          onChange={(color) => dispatch(updatePrimaryColor(color))}
+                        />
+                        <ColorPicker
+                          label="Secondary Color"
+                          value={currentStyle.secondaryColor || '#3b82f6'}
+                          onChange={(color) => dispatch(updateSecondaryColor(color))}
+                        />
+                        <ColorPicker
+                          label="Accent Color"
+                          value={currentStyle.accentColor || '#60a5fa'}
+                          onChange={(color) => dispatch(updateAccentColor(color))}
+                        />
+                        <ColorPicker
+                          label="Text Color"
+                          value={currentStyle.textColor || '#1f2937'}
+                          onChange={(color) => dispatch(updateTextColor(color))}
+                        />
+                        <ColorPicker
+                          label="Background Color"
+                          value={currentStyle.backgroundColor || '#ffffff'}
+                          onChange={(color) => dispatch(updateBackgroundColor(color))}
+                        />
+                      </div>
+                    )}
+
+                    {section.id === 'typography' && (
+                      <div className="pt-4">
+                        <FontSelector
+                          value={currentStyle.fontFamily}
+                          onChange={(font) => dispatch(updateFontFamily(font))}
+                        />
+                      </div>
+                    )}
+
+                    {section.id === 'spacing' && (
+                      <div className="pt-4">
+                        <SpacingControls
+                          spacing={currentStyle.spacing}
+                          onSpacingChange={(spacing) =>
+                            dispatch(updateSpacing(spacing))
+                          }
+                          fontSize={currentStyle.fontSize}
+                          onFontSizeChange={(size) =>
+                            dispatch(updateFontSize(size))
+                          }
+                          lineHeight={currentStyle.lineHeight}
+                          onLineHeightChange={(height) =>
+                            dispatch(updateLineHeight(height))
+                          }
+                        />
+                      </div>
+                    )}
+
+                    {section.id === 'borders' && (
+                      <div className="pt-4">
+                        <BorderStyler
+                          borderStyle={currentStyle.borderStyle}
+                          borderColor={currentStyle.borderColor}
+                          onBorderStyleChange={(style) =>
+                            dispatch(updateBorderStyle(style))
+                          }
+                          onBorderColorChange={(color) =>
+                            dispatch(updateBorderColor(color))
+                          }
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Custom Colors */}
-      <div className="space-y-3 pt-3 border-t border-gray-200">
-        <label className="text-sm font-medium text-gray-700">Custom Colors</label>
-        
-        {/* Primary Color */}
-        <div className="space-y-2">
-          <label className="text-xs text-gray-600">Primary Color</label>
-          <div className="flex items-center gap-2">
-            <input
-              type="color"
-              value={currentStyle.primaryColor}
-              onChange={(e) => handleColorChange('primaryColor', e.target.value)}
-              className="w-12 h-10 rounded border border-gray-300 cursor-pointer"
-            />
-            <input
-              type="text"
-              value={currentStyle.primaryColor}
-              onChange={(e) => handleColorChange('primaryColor', e.target.value)}
-              className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="#2563eb"
-            />
-          </div>
-        </div>
-
-        {/* Text Color */}
-        <div className="space-y-2">
-          <label className="text-xs text-gray-600">Text Color</label>
-          <div className="flex items-center gap-2">
-            <input
-              type="color"
-              value={currentStyle.textColor || '#1f2937'}
-              onChange={(e) => handleColorChange('textColor', e.target.value)}
-              className="w-12 h-10 rounded border border-gray-300 cursor-pointer"
-            />
-            <input
-              type="text"
-              value={currentStyle.textColor || '#1f2937'}
-              onChange={(e) => handleColorChange('textColor', e.target.value)}
-              className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="#1f2937"
-            />
-          </div>
-        </div>
-
-        {/* Background Color */}
-        <div className="space-y-2">
-          <label className="text-xs text-gray-600">Background Color</label>
-          <div className="flex items-center gap-2">
-            <input
-              type="color"
-              value={currentStyle.backgroundColor || '#ffffff'}
-              onChange={(e) => handleColorChange('backgroundColor', e.target.value)}
-              className="w-12 h-10 rounded border border-gray-300 cursor-pointer"
-            />
-            <input
-              type="text"
-              value={currentStyle.backgroundColor || '#ffffff'}
-              onChange={(e) => handleColorChange('backgroundColor', e.target.value)}
-              className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="#ffffff"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Typography */}
-      <div className="space-y-3 pt-3 border-t border-gray-200">
-        <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-          <Type className="w-4 h-4" />
-          Typography
-        </label>
-
-        {/* Font Family */}
-        <div className="space-y-2">
-          <label className="text-xs text-gray-600">Font Family</label>
-          <select
-            value={currentStyle.fontFamily}
-            onChange={(e) => handleFontChange(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {fontOptions.map((font) => (
-              <option key={font.value} value={font.value}>
-                {font.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Font Size */}
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <label className="text-xs text-gray-600">Font Size</label>
-            <span className="text-xs text-gray-500">{currentStyle.fontSize}px</span>
-          </div>
-          <input
-            type="range"
-            min="10"
-            max="18"
-            step="1"
-            value={currentStyle.fontSize}
-            onChange={(e) => handleFontSizeChange(Number(e.target.value))}
-            className="w-full"
-          />
-          <div className="flex justify-between text-xs text-gray-400">
-            <span>10px</span>
-            <span>18px</span>
-          </div>
-        </div>
-
-        {/* Line Height */}
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <label className="text-xs text-gray-600">Line Height</label>
-            <span className="text-xs text-gray-500">{currentStyle.lineHeight}</span>
-          </div>
-          <input
-            type="range"
-            min="1.2"
-            max="2.0"
-            step="0.1"
-            value={currentStyle.lineHeight}
-            onChange={(e) => handleLineHeightChange(Number(e.target.value))}
-            className="w-full"
-          />
-          <div className="flex justify-between text-xs text-gray-400">
-            <span>1.2</span>
-            <span>2.0</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Spacing */}
-      <div className="space-y-3 pt-3 border-t border-gray-200">
-        <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-          <Maximize2 className="w-4 h-4" />
-          Spacing
-        </label>
-
-        <div className="grid grid-cols-3 gap-2">
-          {(['compact', 'normal', 'relaxed'] as const).map((spacing) => (
-            <button
-              key={spacing}
-              onClick={() => handleSpacingChange(spacing)}
-              className={`px-3 py-2 text-sm rounded border-2 transition-colors ${
-                currentStyle.spacing === spacing
-                  ? 'border-blue-600 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              {spacing.charAt(0).toUpperCase() + spacing.slice(1)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Reset Button */}
-      <div className="pt-3 border-t border-gray-200">
+      {/* Footer Actions */}
+      <div className="p-4 border-t border-gray-200 bg-gray-50">
         <button
-          onClick={() => {
-            dispatch(setStyle({
-              primaryColor: '#2563eb',
-              textColor: '#1f2937',
-              backgroundColor: '#ffffff',
-              fontFamily: 'Inter, sans-serif',
-              fontSize: 14,
-              lineHeight: 1.6,
-              spacing: 'normal',
-            }));
-          }}
-          className="w-full px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+          onClick={() => dispatch(resetStyle())}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
         >
+          <RotateCcw className="w-4 h-4" />
           Reset to Default
         </button>
       </div>

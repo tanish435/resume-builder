@@ -67,19 +67,16 @@ export default function CreativeTemplate({ resume, sections, style }: TemplatePr
         >
           <div className="creative-sidebar text-white">
             {left.length > 0 ? (
-              left.map((section) => (
-                <div
-                  key={section.id}
-                  className="section-wrapper mb-6"
-                >
-                  {BaseTemplateUtils.renderWrappedSection(section, {
-                    ...style,
-                    textColor: '#ffffff',
-                    primaryColor: '#ffffff',
-                    backgroundColor: 'transparent',
-                  })}
-                </div>
-              ))
+              BaseTemplateUtils.renderSectionsWithDividers(
+                left,
+                {
+                  ...style,
+                  textColor: '#ffffff',
+                  primaryColor: '#ffffff',
+                  backgroundColor: 'transparent',
+                  borderColor: 'rgba(255, 255, 255, 0.3)', // Semi-transparent white for dividers
+                }
+              )
             ) : (
               <div className="text-sm text-white/80">
                 <p>Add sections like:</p>
@@ -111,7 +108,7 @@ export default function CreativeTemplate({ resume, sections, style }: TemplatePr
           />
 
           {right.length > 0 ? (
-            right.map((section) => BaseTemplateUtils.renderWrappedSection(section, style))
+            BaseTemplateUtils.renderSectionsWithDividers(right, style)
           ) : (
             BaseTemplateUtils.renderEmptyState()
           )}

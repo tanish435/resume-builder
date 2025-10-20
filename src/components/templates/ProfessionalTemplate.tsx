@@ -63,7 +63,7 @@ export default function ProfessionalTemplate({ resume, sections, style }: Templa
           }}
         >
           {left.length > 0 ? (
-            left.map((section) => BaseTemplateUtils.renderWrappedSection(section, style))
+            BaseTemplateUtils.renderSectionsWithDividers(left, style)
           ) : (
             <div className="text-sm text-gray-500">
               <p>Add sections like:</p>
@@ -85,7 +85,7 @@ export default function ProfessionalTemplate({ resume, sections, style }: Templa
           }}
         >
           {right.length > 0 ? (
-            right.map((section) => BaseTemplateUtils.renderWrappedSection(section, style))
+            BaseTemplateUtils.renderSectionsWithDividers(right, style)
           ) : (
             BaseTemplateUtils.renderEmptyState()
           )}

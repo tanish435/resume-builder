@@ -65,13 +65,14 @@ export default function MinimalTemplate({ resume, sections, style }: TemplatePro
                 {BaseTemplateUtils.renderWrappedSection(section, style)}
 
                 {/* Subtle section divider (except last section) */}
-                {index < contentSections.length - 1 && (
+                {index < contentSections.length - 1 && style.borderStyle && style.borderStyle !== 'none' && (
                   <div
                     className="section-divider my-12 mx-auto rounded-full"
                     style={{
-                      height: '1px',
+                      height: style.borderStyle === 'dashed' ? '2px' : '1px',
                       width: '60px',
-                      backgroundColor: style.borderColor || '#e5e7eb',
+                      backgroundColor: style.borderStyle === 'solid' ? (style.borderColor || '#e5e7eb') : 'transparent',
+                      borderTop: style.borderStyle === 'dashed' ? `1px dashed ${style.borderColor || '#e5e7eb'}` : undefined,
                       opacity: 0.5,
                     }}
                   />

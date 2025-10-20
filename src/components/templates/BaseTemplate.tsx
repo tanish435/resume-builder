@@ -92,15 +92,26 @@ export class BaseTemplateUtils {
   }
 
   /**
-   * Get section divider style
+   * Get section divider component
    */
-  static getSectionDivider(style: StyleConfig): string {
+  static renderSectionDivider(style: StyleConfig, key?: string) {
     if (!style.borderStyle || style.borderStyle === 'none') {
-      return '';
+      return null;
     }
 
     const borderColor = style.borderColor || style.primaryColor || '#e5e7eb';
-    return `border-b border-${style.borderStyle}`;
+    const borderWidth = '1px';
+    
+    return (
+      <div
+        key={key}
+        className="section-divider my-4"
+        style={{
+          borderBottom: `${borderWidth} ${style.borderStyle} ${borderColor}`,
+          width: '100%',
+        }}
+      />
+    );
   }
 
   /**
@@ -156,6 +167,23 @@ export class BaseTemplateUtils {
         {BaseTemplateUtils.renderSection(section, style)}
       </SectionWrapper>
     );
+  }
+
+  /**
+   * Render sections with dividers between them
+   */
+  static renderSectionsWithDividers(sections: Section[], style: StyleConfig) {
+    if (sections.length === 0) {
+      return BaseTemplateUtils.renderEmptyState();
+    }
+
+    return sections.map((section, index) => (
+      <div key={section.id}>
+        {BaseTemplateUtils.renderWrappedSection(section, style)}
+        {/* Add divider after each section except the last one */}
+        {index < sections.length - 1 && BaseTemplateUtils.renderSectionDivider(style, `divider-${section.id}`)}
+      </div>
+    ));
   }
 
   /**
