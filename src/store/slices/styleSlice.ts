@@ -1,12 +1,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { StyleConfig, StylePreset } from '@/types/schema';
+import type { ThemePreset } from '@/lib/themes';
 
 export interface StyleState {
   currentStyle: StyleConfig;
   availablePresets: StylePreset[];
   customStyles: StyleConfig[];
+  customThemes: ThemePreset[];
   isLoadingPresets: boolean;
   activePresetId: string | null;
+  activeThemeId: string | null;
 }
 
 const defaultStyle: StyleConfig = {
@@ -25,8 +28,10 @@ const initialState: StyleState = {
   currentStyle: defaultStyle,
   availablePresets: [],
   customStyles: [],
+  customThemes: [],
   isLoadingPresets: false,
   activePresetId: null,
+  activeThemeId: null,
 };
 
 const styleSlice = createSlice({
@@ -132,6 +137,36 @@ const styleSlice = createSlice({
     resetStyle: (state) => {
       state.currentStyle = defaultStyle;
       state.activePresetId = null;
+      state.activeThemeId = null;
+    },
+
+    // Theme actions
+    applyTheme: (state, action: PayloadAction<{ themeId: string; config: StyleConfig }>) => {
+      state.currentStyle = action.payload.config;
+      state.activeThemeId = action.payload.themeId;
+      state.activePresetId = null;
+    },
+
+    saveCustomTheme: (state, action: PayloadAction<ThemePreset>) => {
+      state.customThemes.push(action.payload);
+    },
+
+    deleteCustomTheme: (state, action: PayloadAction<string>) => {
+      state.customThemes = state.customThemes.filter(
+        (theme) => theme.id !== action.payload
+      );
+      if (state.activeThemeId === action.payload) {
+        state.activeThemeId = null;
+      }
+    },
+
+    updateCustomTheme: (state, action: PayloadAction<ThemePreset>) => {
+      const index = state.customThemes.findIndex(
+        (theme) => theme.id === action.payload.id
+      );
+      if (index !== -1) {
+        state.customThemes[index] = action.payload;
+      }
     },
 
     // Reset all
@@ -160,6 +195,10 @@ export const {
   deleteCustomStyle,
   setLoadingPresets,
   resetStyle,
+  applyTheme,
+  saveCustomTheme,
+  deleteCustomTheme,
+  updateCustomTheme,
   resetStyleState,
 } = styleSlice.actions;
 

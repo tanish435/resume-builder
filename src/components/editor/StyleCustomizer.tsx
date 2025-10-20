@@ -20,7 +20,8 @@ import ColorPicker from '@/components/ui/ColorPicker';
 import FontSelector from '@/components/ui/FontSelector';
 import SpacingControls from '@/components/ui/SpacingControls';
 import BorderStyler from '@/components/ui/BorderStyler';
-import { Palette, Type, Maximize2, Minus, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
+import ThemePresets from '@/components/ui/ThemePresets';
+import { Palette, Type, Maximize2, Minus, ChevronDown, ChevronUp, RotateCcw, Sparkles } from 'lucide-react';
 
 /**
  * Style Customizer Component - Phase 6.1
@@ -36,7 +37,8 @@ export default function StyleCustomizer() {
 
   // Collapsible sections state
   const [expandedSections, setExpandedSections] = useState({
-    colors: true,
+    themes: true,
+    colors: false,
     typography: false,
     spacing: false,
     borders: false,
@@ -51,6 +53,12 @@ export default function StyleCustomizer() {
 
   // Section configuration
   const sections = [
+    {
+      id: 'themes' as const,
+      title: 'Theme Presets',
+      icon: Sparkles,
+      description: 'Quick color schemes',
+    },
     {
       id: 'colors' as const,
       title: 'Colors',
@@ -128,6 +136,12 @@ export default function StyleCustomizer() {
                 {/* Section Content */}
                 {isExpanded && (
                   <div className="p-4 pt-0 border-t border-gray-100 animate-fade-in">
+                    {section.id === 'themes' && (
+                      <div className="pt-4">
+                        <ThemePresets />
+                      </div>
+                    )}
+
                     {section.id === 'colors' && (
                       <div className="space-y-4 pt-4">
                         <ColorPicker
