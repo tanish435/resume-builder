@@ -180,8 +180,8 @@ export interface Section {
   data: SectionData;
   order: number;
   isVisible: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string; // ISO string
+  updatedAt: string; // ISO string
 }
 
 // ============================================
@@ -223,8 +223,8 @@ export interface Template {
   isPremium: boolean;
   isActive: boolean;
   usageCount: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string; // ISO string
+  updatedAt: string; // ISO string
 }
 
 // ============================================
@@ -237,9 +237,9 @@ export interface Resume {
   templateId: string;
   styleConfig: StyleConfig;
   isPublic: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  lastEditedAt: Date;
+  createdAt: string; // ISO string
+  updatedAt: string; // ISO string
+  lastEditedAt: string; // ISO string
   sections?: Section[];
   template?: Template;
 }
@@ -260,7 +260,7 @@ export interface ResumeVersion {
   data: ResumeVersionData;
   version: number;
   action?: string;
-  createdAt: Date;
+  createdAt: string; // ISO string
 }
 
 // ============================================
@@ -272,11 +272,11 @@ export interface ShareLink {
   slug: string;
   isActive: boolean;
   password?: string;
-  expiresAt?: Date;
+  expiresAt?: string; // ISO string
   viewCount: number;
-  lastViewedAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  lastViewedAt?: string; // ISO string
+  createdAt: string; // ISO string
+  updatedAt: string; // ISO string
 }
 
 // ============================================
@@ -287,9 +287,9 @@ export interface User {
   email: string;
   name?: string;
   image?: string;
-  emailVerified?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  emailVerified?: string; // ISO string
+  createdAt: string; // ISO string
+  updatedAt: string; // ISO string
 }
 
 // ============================================
@@ -303,6 +303,6 @@ export interface StylePreset {
   isDefault: boolean;
   isPublic: boolean;
   usageCount: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string; // ISO string
+  updatedAt: string; // ISO string
 }

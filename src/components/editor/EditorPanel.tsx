@@ -6,6 +6,7 @@ import SectionManager from './SectionManager';
 import StyleCustomizer from './StyleCustomizer';
 import TemplateSelector from './TemplateSelector';
 import ExportControls from './ExportControls';
+import HistoryControls from './HistoryControls';
 
 type EditorTab = 'sections' | 'style' | 'templates' | 'export';
 
@@ -47,6 +48,9 @@ export default function EditorPanel({ className = '' }: EditorPanelProps) {
         )}
       </button>
 
+      {/* History Controls */}
+      {!isCollapsed && <HistoryControls />}
+
       {/* Tabs */}
       <div className={`flex ${isCollapsed ? 'flex-col' : 'flex-row'} border-b border-gray-200`}>
         {tabs.map((tab) => {
@@ -74,7 +78,7 @@ export default function EditorPanel({ className = '' }: EditorPanelProps) {
 
       {/* Tab Content */}
       {!isCollapsed && (
-        <div className="p-4 overflow-y-auto h-[calc(100vh-60px)]">
+        <div className="p-4 overflow-y-auto h-[calc(100vh-120px)]">
           {activeTab === 'sections' && <SectionManager />}
           {activeTab === 'style' && <StyleCustomizer />}
           {activeTab === 'templates' && <TemplateSelector />}

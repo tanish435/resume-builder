@@ -4,6 +4,8 @@ import type { Resume, Section } from '@/types/schema';
 export interface HistorySnapshot {
   resume: Resume | null;
   sections: Section[];
+  style?: any; // Style configuration
+  template?: string; // Template name
   timestamp: number;
   action: string; // Description of what changed
 }
@@ -15,6 +17,7 @@ export interface HistoryState {
   maxHistory: number;
   canUndo: boolean;
   canRedo: boolean;
+  lastAction: string; // Last action description for UI
 }
 
 const initialState: HistoryState = {
@@ -24,6 +27,7 @@ const initialState: HistoryState = {
   maxHistory: 50, // Keep last 50 snapshots
   canUndo: false,
   canRedo: false,
+  lastAction: '',
 };
 
 const historySlice = createSlice({
@@ -36,15 +40,19 @@ const historySlice = createSlice({
       action: PayloadAction<{
         resume: Resume | null;
         sections: Section[];
+        style?: any;
+        template?: string;
         action: string;
       }>
     ) => {
-      const { resume, sections, action: actionDesc } = action.payload;
+      const { resume, sections, style, template, action: actionDesc } = action.payload;
 
       // Create new snapshot
       const newSnapshot: HistorySnapshot = {
         resume,
         sections: JSON.parse(JSON.stringify(sections)), // Deep clone
+        style: style ? JSON.parse(JSON.stringify(style)) : undefined,
+        template,
         timestamp: Date.now(),
         action: actionDesc,
       };
@@ -68,6 +76,7 @@ const historySlice = createSlice({
       // Update flags
       state.canUndo = state.past.length > 0;
       state.canRedo = false;
+      state.lastAction = actionDesc;
     },
 
     // Undo action
@@ -83,6 +92,7 @@ const historySlice = createSlice({
       const previous = state.past.pop();
       if (previous) {
         state.present = previous;
+        state.lastAction = `Undid: ${previous.action}`;
       }
 
       // Update flags
@@ -103,6 +113,7 @@ const historySlice = createSlice({
       const next = state.future.shift();
       if (next) {
         state.present = next;
+        state.lastAction = `Redid: ${next.action}`;
       }
 
       // Update flags
@@ -116,6 +127,7 @@ const historySlice = createSlice({
       state.future = [];
       state.canUndo = false;
       state.canRedo = false;
+      state.lastAction = '';
     },
 
     // Initialize history with current state
@@ -124,13 +136,17 @@ const historySlice = createSlice({
       action: PayloadAction<{
         resume: Resume | null;
         sections: Section[];
+        style?: any;
+        template?: string;
       }>
     ) => {
-      const { resume, sections } = action.payload;
+      const { resume, sections, style, template } = action.payload;
       
       state.present = {
         resume,
         sections: JSON.parse(JSON.stringify(sections)),
+        style: style ? JSON.parse(JSON.stringify(style)) : undefined,
+        template,
         timestamp: Date.now(),
         action: 'Initial state',
       };
@@ -139,6 +155,7 @@ const historySlice = createSlice({
       state.future = [];
       state.canUndo = false;
       state.canRedo = false;
+      state.lastAction = 'Initial state';
     },
 
     // Set max history size
@@ -155,6 +172,11 @@ const historySlice = createSlice({
     resetHistory: () => {
       return initialState;
     },
+
+    // Update last action (for external use)
+    updateLastAction: (state, action: PayloadAction<string>) => {
+      state.lastAction = action.payload;
+    },
   },
 });
 
@@ -166,6 +188,7 @@ export const {
   initializeHistory,
   setMaxHistory,
   resetHistory,
+  updateLastAction,
 } = historySlice.actions;
 
 export default historySlice.reducer;

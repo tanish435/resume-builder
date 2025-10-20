@@ -1,20 +1,28 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useAppDispatch } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setResume } from '@/store/slices/resumeSlice';
 import { setActiveTemplate } from '@/store/slices/templateSlice';
 import { setStyle } from '@/store/slices/styleSlice';
+import { initializeHistory } from '@/store/slices/historySlice';
 import ResumeCanvas from '@/components/resume/ResumeCanvas';
 import EditorPanel from '@/components/editor/EditorPanel';
 import { Resume, Section, SectionType, PersonalInfoData, SummaryData, ExperienceData, EducationData } from '@/types/schema';
 
 export default function Home() {
   const dispatch = useAppDispatch();
+  const sections = useAppSelector((state) => state.resume.sections);
+  const currentResume = useAppSelector((state) => state.resume.currentResume);
+  const currentStyle = useAppSelector((state) => state.style.currentStyle);
+  const activeTemplateId = useAppSelector((state) => state.template.activeTemplateId);
+  const historyInitialized = useAppSelector((state) => state.history.present !== null);
 
   // Initialize with sample data
   useEffect(() => {
     // Sample resume data
+    const now = new Date().toISOString();
+    
     const sampleResume: Resume = {
       id: 'sample-resume-1',
       userId: 'user-1',
@@ -30,9 +38,9 @@ export default function Home() {
         spacing: 'normal',
       },
       isPublic: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      lastEditedAt: new Date(),
+      createdAt: now,
+      updatedAt: now,
+      lastEditedAt: now,
     };
 
     // Sample sections
@@ -53,8 +61,8 @@ export default function Home() {
         } as PersonalInfoData,
         order: 0,
         isVisible: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: now,
+        updatedAt: now,
       },
       {
         id: 'section-2',
@@ -65,8 +73,8 @@ export default function Home() {
         } as SummaryData,
         order: 1,
         isVisible: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: now,
+        updatedAt: now,
       },
       {
         id: 'section-3',
@@ -89,8 +97,8 @@ export default function Home() {
         } as ExperienceData,
         order: 2,
         isVisible: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: now,
+        updatedAt: now,
       },
       {
         id: 'section-4',
@@ -115,8 +123,8 @@ export default function Home() {
         } as EducationData,
         order: 3,
         isVisible: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: now,
+        updatedAt: now,
       },
     ];
 
@@ -125,6 +133,19 @@ export default function Home() {
     dispatch(setActiveTemplate('modern'));
     dispatch(setStyle(sampleResume.styleConfig));
   }, [dispatch]);
+
+  // Initialize history after state is loaded
+  useEffect(() => {
+    // Only initialize history once we have data and haven't initialized yet
+    if (sections.length > 0 && currentResume && !historyInitialized) {
+      dispatch(initializeHistory({
+        resume: currentResume,
+        sections: sections,
+        style: currentStyle,
+        template: activeTemplateId,
+      }));
+    }
+  }, [dispatch, sections, currentResume, currentStyle, activeTemplateId, historyInitialized]);
 
   return (
     <div className="flex w-full h-screen">
