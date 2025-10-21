@@ -16,10 +16,14 @@ datasource db {
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
-  name          String?
-  password      String?   // Hashed password
-  image         String?   // Profile picture URL
-  emailVerified DateTime?
+  username      String?   @unique        // Username for login
+  name          String?                  // Full name/display name
+  password      String?                  // Hashed password (for credentials)
+  image         String?                  // Profile picture URL
+  sub           String?   @unique        // Google OAuth sub (unique identifier)
+  initials      String?                  // User initials (e.g., "JD")
+  isVerified    Boolean   @default(false) // Email verification status
+  emailVerified DateTime?                // Email verification timestamp
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

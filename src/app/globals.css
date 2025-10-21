@@ -30,24 +30,6 @@ body {
   .no-print {
     display: none !important;
   }
-
-  /* Additional print optimizations */
-  body {
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
-  }
-
-  /* Prevent page breaks inside important elements */
-  h1, h2, h3, h4, h5, h6 {
-    page-break-after: avoid;
-    page-break-inside: avoid;
-  }
-
-  /* Ensure good text rendering */
-  p, li {
-    orphans: 3;
-    widows: 3;
-  }
 }
 
 /* Template Transition Animations */
@@ -100,6 +82,17 @@ body {
   }
 }
 
+@keyframes slide-in-bottom {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 .animate-fade-in {
   animation: fade-in 0.3s ease-in-out;
 }
@@ -118,6 +111,10 @@ body {
 
 .animate-slide-in-left {
   animation: slide-in-left 0.4s ease-out;
+}
+
+.animate-slide-in-bottom {
+  animation: slide-in-bottom 0.4s ease-out;
 }
 
 /* Smooth template transitions */
@@ -201,4 +198,208 @@ input[type="range"]:focus::-webkit-slider-thumb {
 
 input[type="range"]:focus::-moz-range-thumb {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+/* Button Hover Effects */
+.btn-hover-scale {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-hover-scale:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-hover-scale:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Card Hover Effects */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-color: #3b82f6;
+}
+
+/* Link Hover Effects */
+.link-underline {
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.link-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: currentColor;
+  transition: width 0.3s ease;
+}
+
+.link-underline:hover::after {
+  width: 100%;
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Bounce Animation */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+/* Spin Animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Shake Animation */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Scale on Hover */
+.hover-scale {
+  transition: transform 0.2s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+/* Gradient Background Animation */
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
+}
+
+/* Focus Ring */
+.focus-ring {
+  transition: box-shadow 0.2s ease;
+}
+
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+}
+
+/* Smooth transitions for all interactive elements */
+button, a, input, textarea, select {
+  transition: all 0.2s ease;
+}
+
+/* Mobile Touch Feedback */
+@media (hover: none) and (pointer: coarse) {
+  .btn-hover-scale:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+  
+  .card-hover:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Responsive Text */
+.text-responsive {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+}
+
+.heading-responsive {
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+}
+
+/* Loading Bar */
+.loading-bar {
+  position: relative;
+  overflow: hidden;
+  background: #e5e7eb;
+  height: 4px;
+}
+
+.loading-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 25%;
+  background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+  animation: loading-bar 1.5s ease-in-out infinite;
+}
+
+/* Success Checkmark Animation */
+@keyframes checkmark {
+  0% {
+    stroke-dashoffset: 50;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-checkmark {
+  stroke-dasharray: 50;
+  animation: checkmark 0.5s ease forwards;
 }
