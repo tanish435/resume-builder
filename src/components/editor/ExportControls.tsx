@@ -10,6 +10,7 @@ import {
   estimatePDFSize,
   type ExportProgress,
 } from '@/lib/pdfExport';
+import ShareButton from './ShareButton';
 
 /**
  * Export Controls Component
@@ -246,19 +247,10 @@ export default function ExportControls() {
           </div>
         </button>
 
-        {/* Share (Coming Soon) */}
-        <button
-          className="w-full flex items-center gap-3 p-4 bg-gray-50 border-2 border-gray-200 rounded-lg cursor-not-allowed opacity-60"
-          disabled
-        >
-          <div className="flex-shrink-0 w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
-            <Share2 className="w-5 h-5 text-gray-500" />
-          </div>
-          <div className="flex-1 text-left">
-            <h4 className="font-semibold text-gray-700">Share Online</h4>
-            <p className="text-xs text-gray-500">Public link (coming soon)</p>
-          </div>
-        </button>
+        {/* Share Online */}
+        <div className="w-full">
+          <ShareButton />
+        </div>
       </div>
 
       {/* Instructions */}

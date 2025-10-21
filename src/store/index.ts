@@ -4,6 +4,7 @@ import editorReducer from './slices/editorSlice';
 import historyReducer from './slices/historySlice';
 import styleReducer from './slices/styleSlice';
 import templateReducer from './slices/templateSlice';
+import shareReducer from './slices/shareSlice';
 import { historyMiddleware } from './middleware/historyMiddleware';
 import { autoSaveMiddleware } from './middleware/autoSaveMiddleware';
 import { apiSyncMiddleware } from './middleware/apiSyncMiddleware';
@@ -15,6 +16,7 @@ export const store = configureStore({
     history: historyReducer,
     style: styleReducer,
     template: templateReducer,
+    share: shareReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
