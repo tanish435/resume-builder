@@ -52,18 +52,19 @@ export default function ResumeCanvas() {
   return (
     <div className="relative w-full h-full bg-gray-100 overflow-auto">
       {/* Zoom Controls */}
-      <div className="absolute top-4 right-4 z-10">
+      <div className="absolute top-4 right-4 z-10 no-print">
         <ZoomControls />
       </div>
 
       {/* Canvas Container with Scroll */}
       <div className="flex items-center justify-center min-h-full p-8">
         <div
+          id="resume-canvas"
           ref={canvasRef}
           className="resume-canvas bg-white shadow-2xl transition-transform duration-200 origin-top"
           style={{
             width: `${A4_WIDTH}px`,
-            height: `${A4_HEIGHT}px`,
+            minHeight: `${A4_HEIGHT}px`,
             transform: `scale(${zoom})`,
             transformOrigin: 'top center',
           }}
@@ -78,29 +79,8 @@ export default function ResumeCanvas() {
         </div>
       </div>
 
-      {/* Print Styles */}
-      <style jsx global>{`
-        @media print {
-          .resume-canvas {
-            width: 210mm !important;
-            height: 297mm !important;
-            box-shadow: none !important;
-            transform: none !important;
-            page-break-after: always;
-          }
-          
-          body {
-            margin: 0;
-            padding: 0;
-          }
-          
-          /* Hide non-printable elements */
-          .no-print {
-            display: none !important;
-          }
-        }
-        
-        /* Smooth zoom transitions */
+      {/* Smooth zoom transitions */}
+      <style jsx>{`
         .resume-canvas {
           transition: transform 0.2s ease-in-out;
         }

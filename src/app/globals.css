@@ -30,6 +30,24 @@ body {
   .no-print {
     display: none !important;
   }
+
+  /* Additional print optimizations */
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Prevent page breaks inside important elements */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Ensure good text rendering */
+  p, li {
+    orphans: 3;
+    widows: 3;
+  }
 }
 
 /* Template Transition Animations */

@@ -31,7 +31,7 @@ export default function EditorPanel({ className = '' }: EditorPanelProps) {
 
   return (
     <div
-      className={`editor-panel bg-white border-r border-gray-200 transition-all duration-300 ${
+      className={`editor-panel no-print bg-white border-r border-gray-200 transition-all duration-300 ${
         isCollapsed ? 'w-16' : 'w-80'
       } ${className}`}
     >
