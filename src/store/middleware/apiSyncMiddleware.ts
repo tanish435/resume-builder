@@ -54,8 +54,11 @@ export const apiSyncMiddleware: Middleware =
     if (SYNC_ACTIONS.includes(action.type)) {
       const now = Date.now();
       
+      console.log(`[API Sync] Action detected: ${action.type}`);
+      
       // Throttle syncs to avoid overwhelming the server
       if (now - lastSyncTimestamp < SYNC_THROTTLE) {
+        console.log('[API Sync] Throttled - too soon after last sync');
         return result;
       }
       
@@ -63,6 +66,7 @@ export const apiSyncMiddleware: Middleware =
 
       if (isOnline) {
         // Sync immediately if online
+        console.log('[API Sync] Initiating sync...');
         syncToAPI(store, action).catch((error) => {
           console.error('API sync failed:', error);
           // Add to offline queue on failure
@@ -70,6 +74,7 @@ export const apiSyncMiddleware: Middleware =
         });
       } else {
         // Add to offline queue if offline
+        console.log('[API Sync] Offline - adding to queue');
         offlineQueue.push({ action, timestamp: now });
       }
     }
@@ -172,6 +177,9 @@ async function syncResumeMetadata(resume: any): Promise<void> {
  * Sync sections only (more efficient for section changes)
  */
 async function syncSections(resumeId: string, sections: any[]): Promise<void> {
+  console.log('[API Sync] Syncing sections for resume:', resumeId);
+  console.log('[API Sync] Sections data:', JSON.stringify(sections, null, 2));
+  
   const response = await fetch(`/api/resumes/${resumeId}/sections`, {
     method: 'PUT',
     headers: {
@@ -181,8 +189,13 @@ async function syncSections(resumeId: string, sections: any[]): Promise<void> {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to sync sections');
+    const errorText = await response.text();
+    console.error('[API Sync] Failed to sync sections. Status:', response.status);
+    console.error('[API Sync] Error response:', errorText);
+    throw new Error(`Failed to sync sections: ${response.status} - ${errorText}`);
   }
+  
+  console.log('[API Sync] ✅ Sections synced successfully!');
 }
 
 /**

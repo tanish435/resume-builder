@@ -4,78 +4,43 @@ import { z } from 'zod';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
-// Validation schemas (same as in route.ts)
-const PersonalInfoSchema = z.object({
-  fullName: z.string().min(1, 'Full name is required'),
-  email: z.string().email('Invalid email address'),
-  phone: z.string().optional(),
-  location: z.string().optional(),
-  title: z.string().optional(),
-  summary: z.string().optional(),
-  linkedin: z.string().url().optional().or(z.literal('')),
-  github: z.string().url().optional().or(z.literal('')),
-  website: z.string().url().optional().or(z.literal('')),
-});
-
-const EducationItemSchema = z.object({
-  id: z.string(),
-  institution: z.string().min(1, 'Institution is required'),
-  degree: z.string().min(1, 'Degree is required'),
-  field: z.string().optional(),
-  startDate: z.string(),
-  endDate: z.string().optional(),
-  gpa: z.string().optional(),
-  description: z.string().optional(),
-});
-
-const ExperienceItemSchema = z.object({
-  id: z.string(),
-  company: z.string().min(1, 'Company is required'),
-  position: z.string().min(1, 'Position is required'),
-  location: z.string().optional(),
-  startDate: z.string(),
-  endDate: z.string().optional(),
-  current: z.boolean().optional(),
-  description: z.string().optional(),
-  achievements: z.array(z.string()).optional(),
-});
-
-const SkillItemSchema = z.object({
-  id: z.string(),
-  name: z.string().min(1, 'Skill name is required'),
-  level: z.enum(['Beginner', 'Intermediate', 'Advanced', 'Expert']).optional(),
-  category: z.string().optional(),
-});
-
-const ProjectItemSchema = z.object({
-  id: z.string(),
-  name: z.string().min(1, 'Project name is required'),
-  description: z.string().optional(),
-  technologies: z.array(z.string()).optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  url: z.string().url().optional().or(z.literal('')),
-  github: z.string().url().optional().or(z.literal('')),
-  highlights: z.array(z.string()).optional(),
+// Validation schemas - simplified to match dashboard data structure
+const SectionSchema = z.object({
+  type: z.string(),
+  data: z.any(), // Flexible data field for any section type
+  order: z.number(),
+  isVisible: z.boolean().optional().default(true),
 });
 
 const ResumeUpdateSchema = z.object({
   title: z.string().min(1, 'Resume title is required').optional(),
-  personalInfo: PersonalInfoSchema.optional(),
-  template: z.string().optional(),
-  theme: z.string().optional(),
-  sections: z.object({
-    education: z.array(EducationItemSchema).optional(),
-    experience: z.array(ExperienceItemSchema).optional(),
-    skills: z.array(SkillItemSchema).optional(),
-    projects: z.array(ProjectItemSchema).optional(),
+  templateId: z.string().optional(),
+  styleConfig: z.object({
+    primaryColor: z.string().optional(),
+    textColor: z.string().optional(),
+    backgroundColor: z.string().optional(),
+    fontFamily: z.string().optional(),
+    fontSize: z.number().optional(),
+    lineHeight: z.number().optional(),
+    margins: z.object({
+      top: z.number().optional(),
+      bottom: z.number().optional(),
+      left: z.number().optional(),
+      right: z.number().optional(),
+    }).optional(),
+    spacing: z.object({
+      section: z.number().optional(),
+      paragraph: z.number().optional(),
+    }).optional(),
   }).optional(),
+  sections: z.array(SectionSchema).optional(),
+  isPublic: z.boolean().optional(),
 });
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 /**
@@ -96,7 +61,7 @@ export async function GET(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // Validate ID format
     if (!id || id.trim() === '') {
@@ -177,7 +142,7 @@ export async function PUT(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     // Validate ID
@@ -216,54 +181,27 @@ export async function PUT(
     // Prepare update data
     const updateData: any = {
       updatedAt: new Date(),
+      lastEditedAt: new Date(),
     };
 
-    if (validatedData.title) updateData.title = validatedData.title;
-    if (validatedData.personalInfo) updateData.personalInfo = validatedData.personalInfo;
-    if (validatedData.template) updateData.template = validatedData.template;
-    if (validatedData.theme) updateData.theme = validatedData.theme;
+    if (validatedData.title !== undefined) updateData.title = validatedData.title;
+    if (validatedData.templateId !== undefined) updateData.templateId = validatedData.templateId;
+    if (validatedData.styleConfig !== undefined) updateData.styleConfig = validatedData.styleConfig;
+    if (validatedData.isPublic !== undefined) updateData.isPublic = validatedData.isPublic;
 
     // Update sections if provided
-    if (validatedData.sections) {
+    if (validatedData.sections !== undefined) {
       // Delete existing sections and create new ones
       await prisma.section.deleteMany({
         where: { resumeId: id },
       });
 
-      const sectionsToCreate = [];
-      let order = 0;
-
-      if (validatedData.sections.education) {
-        sectionsToCreate.push({
-          type: 'education',
-          content: validatedData.sections.education,
-          order: order++,
-        });
-      }
-
-      if (validatedData.sections.experience) {
-        sectionsToCreate.push({
-          type: 'experience',
-          content: validatedData.sections.experience,
-          order: order++,
-        });
-      }
-
-      if (validatedData.sections.skills) {
-        sectionsToCreate.push({
-          type: 'skills',
-          content: validatedData.sections.skills,
-          order: order++,
-        });
-      }
-
-      if (validatedData.sections.projects) {
-        sectionsToCreate.push({
-          type: 'projects',
-          content: validatedData.sections.projects,
-          order: order++,
-        });
-      }
+      const sectionsToCreate = validatedData.sections.map(section => ({
+        type: section.type as any,
+        data: section.data,
+        order: section.order,
+        isVisible: section.isVisible !== undefined ? section.isVisible : true,
+      }));
 
       updateData.sections = {
         create: sectionsToCreate,
@@ -330,7 +268,7 @@ export async function DELETE(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // Validate ID
     if (!id || id.trim() === '') {
