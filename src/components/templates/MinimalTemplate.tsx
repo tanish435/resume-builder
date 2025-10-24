@@ -40,10 +40,10 @@ export default function MinimalTemplate({ resume, sections, style }: TemplatePro
         minHeight: '1123px', // A4 height
       }}
     >
-      <div className="max-w-3xl mx-auto px-16 py-12 w-full flex-1">
+      <div className="max-w-3xl mx-auto px-12 py-8 w-full flex-1">
         {/* Header - Personal Info with Subtle Styling */}
         {personalInfoSection && (
-          <div className="header-section mb-10 text-center">
+          <div className="header-section mb-6 text-center">
             {BaseTemplateUtils.renderSection(personalInfoSection, style)}
           </div>
         )}
@@ -51,7 +51,7 @@ export default function MinimalTemplate({ resume, sections, style }: TemplatePro
         {/* Subtle Divider */}
         {personalInfoSection && (
           <div
-            className="divider mb-12 mx-auto rounded-full"
+            className="divider mb-6 mx-auto rounded-full"
             style={{
               height: '2px',
               width: '80px',
@@ -61,7 +61,7 @@ export default function MinimalTemplate({ resume, sections, style }: TemplatePro
         )}
 
         {/* Main Content with Balanced Spacing */}
-        <div className="main-content space-y-10">
+        <div className="main-content space-y-6">
           {contentSections.length > 0 ? (
             contentSections.map((section, index) => (
               <div key={section.id} className="section-block">
@@ -70,7 +70,7 @@ export default function MinimalTemplate({ resume, sections, style }: TemplatePro
                 {/* Subtle section divider (except last section) */}
                 {index < contentSections.length - 1 && (
                   <div
-                    className="section-divider my-8 mx-auto rounded-full"
+                    className="section-divider my-5 mx-auto rounded-full"
                     style={{
                       height: '1px',
                       width: '60px',
@@ -84,14 +84,14 @@ export default function MinimalTemplate({ resume, sections, style }: TemplatePro
           ) : !personalInfoSection ? (
             BaseTemplateUtils.renderEmptyState()
           ) : (
-            <div className="text-center text-gray-400 py-8">
+            <div className="text-center text-gray-400 py-4">
               <p className="text-sm">Add more sections to complete your resume</p>
             </div>
           )}
         </div>
 
         {/* Footer Space */}
-        <div className="footer-space h-8" />
+        <div className="footer-space h-4" />
       </div>
     </div>
   );
