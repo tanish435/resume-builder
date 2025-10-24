@@ -43,47 +43,63 @@ export default function CreativeTemplate({ resume, sections, style }: TemplatePr
     rightColumnTypes
   );
 
-  // Get spacing
-  const spacing = BaseTemplateUtils.getSpacingClass(style.spacing);
+  const primaryColor = style.primaryColor || '#2563eb';
 
   return (
     <div
-      className="creative-template w-full min-h-screen"
+      className="creative-template w-full h-full flex flex-col"
       style={{
         ...BaseTemplateUtils.getContainerStyles(style),
         backgroundColor: '#ffffff',
+        minHeight: '1123px', // A4 height
       }}
     >
-      <div className="flex flex-row min-h-screen">
-        {/* Left Column - 35% with Accent Background */}
+      <div className="flex flex-row flex-1 h-full">
+        {/* Left Column - 35% with Bold Accent Background */}
         <div
-          className={`left-column p-10 ${spacing}`}
+          className="left-column"
           style={{
             width: '35%',
-            minWidth: '320px',
-            backgroundColor: style.primaryColor || '#2563eb',
+            maxWidth: '300px',
+            padding: '40px 28px',
+            backgroundColor: primaryColor,
             color: '#ffffff',
+            backgroundImage: `linear-gradient(135deg, ${primaryColor} 0%, ${primaryColor}dd 100%)`,
           }}
         >
           <div className="creative-sidebar text-white">
             {left.length > 0 ? (
-              BaseTemplateUtils.renderSectionsWithDividers(
-                left,
-                {
-                  ...style,
-                  textColor: '#ffffff',
-                  primaryColor: '#ffffff',
-                  backgroundColor: 'transparent',
-                  borderColor: 'rgba(255, 255, 255, 0.3)', // Semi-transparent white for dividers
-                }
-              )
+              <div className="space-y-8">
+                {left.map((section, index) => (
+                  <div key={section.id}>
+                    {index > 0 && (
+                      <div className="my-6 border-t border-white/30"></div>
+                    )}
+                    {BaseTemplateUtils.renderSection(section, {
+                      ...style,
+                      textColor: '#ffffff',
+                      primaryColor: '#ffffff',
+                      backgroundColor: 'transparent',
+                    })}
+                  </div>
+                ))}
+              </div>
             ) : (
-              <div className="text-sm text-white/80">
-                <p>Add sections like:</p>
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Personal Info</li>
-                  <li>Skills</li>
-                  <li>Languages</li>
+              <div className="text-sm text-white/90">
+                <p className="font-semibold mb-3 text-white">Creative sidebar:</p>
+                <ul className="list-none space-y-2 text-xs text-white/80">
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
+                    Personal Info
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
+                    Skills
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 bg-white rounded-full"></span>
+                    Languages
+                  </li>
                 </ul>
               </div>
             )}
@@ -92,23 +108,52 @@ export default function CreativeTemplate({ resume, sections, style }: TemplatePr
 
         {/* Right Column - 65% Main Content */}
         <div
-          className={`right-column p-12 ${spacing}`}
+          className="right-column flex-1"
           style={{
-            width: '65%',
-            flex: '1',
+            padding: '40px',
             backgroundColor: '#ffffff',
           }}
         >
-          {/* Decorative accent bar */}
-          <div
-            className="accent-bar h-2 mb-8 w-24 rounded-full"
-            style={{
-              backgroundColor: style.primaryColor || '#2563eb',
-            }}
-          />
+          {/* Decorative accent elements */}
+          <div className="flex items-center gap-3 mb-10">
+            <div
+              className="accent-bar h-1.5 w-32 rounded-full"
+              style={{
+                backgroundColor: primaryColor,
+              }}
+            />
+            <div
+              className="h-1.5 w-20 rounded-full opacity-50"
+              style={{
+                backgroundColor: primaryColor,
+              }}
+            />
+            <div
+              className="h-1.5 w-12 rounded-full opacity-25"
+              style={{
+                backgroundColor: primaryColor,
+              }}
+            />
+          </div>
 
           {right.length > 0 ? (
-            BaseTemplateUtils.renderSectionsWithDividers(right, style)
+            <div className="space-y-8">
+              {right.map((section, index) => (
+                <div key={section.id} className="relative">
+                  {index > 0 && (
+                    <div className="my-8">
+                      <div
+                        className="h-0.5 w-full rounded"
+                        style={{
+                          background: `linear-gradient(to right, ${primaryColor}40, transparent)`,
+                        }}
+                      ></div>
+                    </div>
+                  )}
+                  {BaseTemplateUtils.renderSection(section, style)}
+                </div>
+              ))}
+            </div>
           ) : (
             BaseTemplateUtils.renderEmptyState()
           )}

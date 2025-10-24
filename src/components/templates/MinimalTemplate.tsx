@@ -34,21 +34,24 @@ export default function MinimalTemplate({ resume, sections, style }: TemplatePro
 
   return (
     <div
-      className="minimal-template w-full min-h-screen"
-      style={BaseTemplateUtils.getContainerStyles(style)}
+      className="minimal-template w-full h-full flex flex-col"
+      style={{
+        ...BaseTemplateUtils.getContainerStyles(style),
+        minHeight: '1123px', // A4 height
+      }}
     >
-      <div className="max-w-3xl mx-auto px-8 py-8">
+      <div className="max-w-3xl mx-auto px-16 py-12 w-full flex-1">
         {/* Header - Personal Info with Subtle Styling */}
         {personalInfoSection && (
-          <div className="header-section mb-8 text-center">
-            {BaseTemplateUtils.renderWrappedSection(personalInfoSection, style)}
+          <div className="header-section mb-10 text-center">
+            {BaseTemplateUtils.renderSection(personalInfoSection, style)}
           </div>
         )}
 
         {/* Subtle Divider */}
         {personalInfoSection && (
           <div
-            className="divider mb-8 mx-auto rounded-full"
+            className="divider mb-12 mx-auto rounded-full"
             style={{
               height: '2px',
               width: '80px',
@@ -58,21 +61,20 @@ export default function MinimalTemplate({ resume, sections, style }: TemplatePro
         )}
 
         {/* Main Content with Balanced Spacing */}
-        <div className={`main-content ${spacing}`}>
+        <div className="main-content space-y-10">
           {contentSections.length > 0 ? (
             contentSections.map((section, index) => (
               <div key={section.id} className="section-block">
-                {BaseTemplateUtils.renderWrappedSection(section, style)}
+                {BaseTemplateUtils.renderSection(section, style)}
 
                 {/* Subtle section divider (except last section) */}
-                {index < contentSections.length - 1 && style.borderStyle && style.borderStyle !== 'none' && (
+                {index < contentSections.length - 1 && (
                   <div
-                    className="section-divider my-6 mx-auto rounded-full"
+                    className="section-divider my-8 mx-auto rounded-full"
                     style={{
-                      height: style.borderStyle === 'dashed' ? '2px' : '1px',
+                      height: '1px',
                       width: '60px',
-                      backgroundColor: style.borderStyle === 'solid' ? (style.borderColor || '#e5e7eb') : 'transparent',
-                      borderTop: style.borderStyle === 'dashed' ? `1px dashed ${style.borderColor || '#e5e7eb'}` : undefined,
+                      backgroundColor: style.borderColor || '#e5e7eb',
                       opacity: 0.5,
                     }}
                   />
