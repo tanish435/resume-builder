@@ -61,6 +61,58 @@ export default function ProjectsSection({ section, style }: ProjectsSectionProps
     }));
   };
 
+  const handleAddTechnology = (entryId: string, techName: string) => {
+    if (!techName.trim()) return;
+
+    const updatedEntries = data.entries.map((entry) => {
+      if (entry.id === entryId) {
+        return {
+          ...entry,
+          technologies: [...(entry.technologies || []), techName.trim()],
+        };
+      }
+      return entry;
+    });
+
+    const updatedData = {
+      ...data,
+      entries: updatedEntries,
+    };
+
+    dispatch(updateSection({
+      id: section.id,
+      data: {
+        ...section,
+        data: updatedData,
+      },
+    }));
+  };
+
+  const handleDeleteTechnology = (entryId: string, techIndex: number) => {
+    const updatedEntries = data.entries.map((entry) => {
+      if (entry.id === entryId) {
+        return {
+          ...entry,
+          technologies: entry.technologies?.filter((_, idx) => idx !== techIndex) || [],
+        };
+      }
+      return entry;
+    });
+
+    const updatedData = {
+      ...data,
+      entries: updatedEntries,
+    };
+
+    dispatch(updateSection({
+      id: section.id,
+      data: {
+        ...section,
+        data: updatedData,
+      },
+    }));
+  };
+
   return (
     <div className="projects-section">
       {/* Section Title with Add Button */}
@@ -182,17 +234,57 @@ export default function ProjectsSection({ section, style }: ProjectsSectionProps
                   {entry.technologies.map((tech, idx) => (
                     <span
                       key={idx}
-                      className="px-2 py-1 text-xs rounded"
+                      className="group/tech px-2 py-1 text-xs rounded relative inline-flex items-center gap-1 cursor-pointer hover:opacity-75 transition-opacity"
                       style={{
                         backgroundColor: `${style.primaryColor}20`,
                         color: style.primaryColor,
                       }}
                     >
                       {tech}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteTechnology(entry.id, idx);
+                        }}
+                        className="no-print ml-1 opacity-0 group-hover/tech:opacity-100 transition-opacity"
+                        title="Remove technology"
+                      >
+                        <Trash2 className="w-3 h-3 text-red-500" />
+                      </button>
                     </span>
                   ))}
                 </div>
               )}
+
+              {/* Add Technology Input */}
+              <div className="no-print mt-2">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const input = e.currentTarget.elements.namedItem('techInput') as HTMLInputElement;
+                    if (input.value.trim()) {
+                      handleAddTechnology(entry.id, input.value);
+                      input.value = '';
+                    }
+                  }}
+                  className="flex gap-2"
+                >
+                  <input
+                    name="techInput"
+                    type="text"
+                    placeholder="Add technology (e.g., React, Node.js)..."
+                    className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    type="submit"
+                    className="px-3 py-1.5 text-sm rounded flex items-center gap-1 hover:bg-blue-100 transition-colors"
+                    style={{ color: style.primaryColor }}
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Tech
+                  </button>
+                </form>
+              </div>
             </div>
           ))
         ) : (

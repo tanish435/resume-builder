@@ -55,6 +55,58 @@ export default function SkillsSection({ section, style }: SkillsSectionProps) {
     }));
   };
 
+  const handleAddSkill = (categoryId: string, skillName: string) => {
+    if (!skillName.trim()) return;
+
+    const updatedCategories = data.categories?.map((cat) => {
+      if (cat.id === categoryId) {
+        return {
+          ...cat,
+          skills: [...cat.skills, skillName.trim()],
+        };
+      }
+      return cat;
+    });
+
+    const updatedData = {
+      ...data,
+      categories: updatedCategories,
+    };
+
+    dispatch(updateSection({
+      id: section.id,
+      data: {
+        ...section,
+        data: updatedData,
+      },
+    }));
+  };
+
+  const handleDeleteSkill = (categoryId: string, skillIndex: number) => {
+    const updatedCategories = data.categories?.map((cat) => {
+      if (cat.id === categoryId) {
+        return {
+          ...cat,
+          skills: cat.skills.filter((_, idx) => idx !== skillIndex),
+        };
+      }
+      return cat;
+    });
+
+    const updatedData = {
+      ...data,
+      categories: updatedCategories,
+    };
+
+    dispatch(updateSection({
+      id: section.id,
+      data: {
+        ...section,
+        data: updatedData,
+      },
+    }));
+  };
+
   return (
     <div className="skills-section">
       {/* Section Title with Add Button */}
@@ -108,11 +160,11 @@ export default function SkillsSection({ section, style }: SkillsSectionProps) {
               />
 
               {/* Skills */}
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 mb-2">
                 {category.skills.map((skill, idx) => (
                   <span
                     key={idx}
-                    className="px-3 py-1 rounded-full text-sm"
+                    className="group/skill px-3 py-1 rounded-full text-sm relative inline-flex items-center gap-1 cursor-pointer hover:opacity-75 transition-opacity"
                     style={{
                       backgroundColor: `${style.primaryColor}15`,
                       color: style.textColor || '#000000',
@@ -120,8 +172,48 @@ export default function SkillsSection({ section, style }: SkillsSectionProps) {
                     }}
                   >
                     {skill}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteSkill(category.id, idx);
+                      }}
+                      className="no-print ml-1 opacity-0 group-hover/skill:opacity-100 transition-opacity"
+                      title="Remove skill"
+                    >
+                      <Trash2 className="w-3 h-3 text-red-500" />
+                    </button>
                   </span>
                 ))}
+              </div>
+
+              {/* Add Skill Input */}
+              <div className="no-print mt-2">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const input = e.currentTarget.elements.namedItem('skillInput') as HTMLInputElement;
+                    if (input.value.trim()) {
+                      handleAddSkill(category.id, input.value);
+                      input.value = '';
+                    }
+                  }}
+                  className="flex gap-2"
+                >
+                  <input
+                    name="skillInput"
+                    type="text"
+                    placeholder="Add skill (e.g., React, Python)..."
+                    className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    type="submit"
+                    className="px-3 py-1.5 text-sm rounded flex items-center gap-1 hover:bg-blue-100 transition-colors"
+                    style={{ color: style.primaryColor }}
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add
+                  </button>
+                </form>
               </div>
             </div>
           ))}
