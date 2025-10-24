@@ -2,7 +2,10 @@
 
 import { Section, StyleConfig, PersonalInfoData } from '@/types/schema';
 import EditableContent from '../EditableContent';
-import { Mail, Phone, MapPin, Linkedin, Github, Globe } from 'lucide-react';
+import { Mail, Phone, MapPin, Linkedin, Github, Globe, X, Plus } from 'lucide-react';
+import { useAppDispatch } from '@/store/hooks';
+import { updateSection } from '@/store/slices/resumeSlice';
+import { useState } from 'react';
 
 interface PersonalInfoSectionProps {
   section: Section;
@@ -14,7 +17,41 @@ interface PersonalInfoSectionProps {
  * Displays contact information and personal details
  */
 export default function PersonalInfoSection({ section, style }: PersonalInfoSectionProps) {
+  const dispatch = useAppDispatch();
   const data = section.data as PersonalInfoData;
+  const [showAddLinks, setShowAddLinks] = useState(false);
+
+  const handleRemoveLink = (field: 'linkedin' | 'github' | 'website') => {
+    const updatedData = {
+      ...data,
+      [field]: undefined,
+    };
+
+    dispatch(updateSection({
+      id: section.id,
+      data: {
+        ...section,
+        data: updatedData,
+      },
+    }));
+  };
+
+  const handleAddLink = (field: 'linkedin' | 'github' | 'website', value: string) => {
+    if (!value.trim()) return;
+
+    const updatedData = {
+      ...data,
+      [field]: value.trim(),
+    };
+
+    dispatch(updateSection({
+      id: section.id,
+      data: {
+        ...section,
+        data: updatedData,
+      },
+    }));
+  };
 
   return (
     <div className="personal-info-section text-center">
@@ -87,45 +124,188 @@ export default function PersonalInfoSection({ section, style }: PersonalInfoSect
       </div>
 
       {/* Social Links */}
-      <div className="flex flex-wrap items-center justify-center gap-4 mt-3 text-sm">
-        {/* LinkedIn */}
-        {data.linkedin && (
-          <a
-            href={data.linkedin}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 text-blue-600 hover:underline"
-          >
-            <Linkedin className="w-4 h-4" />
-            <span>LinkedIn</span>
-          </a>
-        )}
+      <div className="mt-3">
+        <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
+          {/* LinkedIn */}
+          {data.linkedin && (
+            <div className="group/link relative inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+              <Linkedin className="w-4 h-4 text-blue-600" />
+              <EditableContent
+                sectionId={section.id}
+                fieldPath="data.linkedin"
+                value={data.linkedin}
+                placeholder="https://linkedin.com/in/username"
+                as="span"
+                className="text-blue-600"
+              />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveLink('linkedin');
+                }}
+                className="no-print ml-1 opacity-0 group-hover/link:opacity-100 transition-opacity"
+                title="Remove LinkedIn"
+              >
+                <X className="w-3 h-3 text-red-500 hover:text-red-700" />
+              </button>
+            </div>
+          )}
 
-        {/* GitHub */}
-        {data.github && (
-          <a
-            href={data.github}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 text-gray-700 hover:underline"
-          >
-            <Github className="w-4 h-4" />
-            <span>GitHub</span>
-          </a>
-        )}
+          {/* GitHub */}
+          {data.github && (
+            <div className="group/link relative inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+              <Github className="w-4 h-4 text-gray-700" />
+              <EditableContent
+                sectionId={section.id}
+                fieldPath="data.github"
+                value={data.github}
+                placeholder="https://github.com/username"
+                as="span"
+                className="text-gray-700"
+              />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveLink('github');
+                }}
+                className="no-print ml-1 opacity-0 group-hover/link:opacity-100 transition-opacity"
+                title="Remove GitHub"
+              >
+                <X className="w-3 h-3 text-red-500 hover:text-red-700" />
+              </button>
+            </div>
+          )}
 
-        {/* Website/Portfolio */}
-        {data.website && (
-          <a
-            href={data.website}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 text-gray-700 hover:underline"
-          >
-            <Globe className="w-4 h-4" />
-            <span>Portfolio</span>
-          </a>
-        )}
+          {/* Website/Portfolio */}
+          {data.website && (
+            <div className="group/link relative inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+              <Globe className="w-4 h-4 text-gray-700" />
+              <EditableContent
+                sectionId={section.id}
+                fieldPath="data.website"
+                value={data.website}
+                placeholder="https://yourportfolio.com"
+                as="span"
+                className="text-gray-700"
+              />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveLink('website');
+                }}
+                className="no-print ml-1 opacity-0 group-hover/link:opacity-100 transition-opacity"
+                title="Remove Portfolio"
+              >
+                <X className="w-3 h-3 text-red-500 hover:text-red-700" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Add Missing Links */}
+        <div className="no-print mt-3">
+          {(!data.linkedin || !data.github || !data.website) && (
+            <button
+              onClick={() => setShowAddLinks(!showAddLinks)}
+              className="text-sm px-3 py-1 rounded hover:bg-gray-100 transition-colors flex items-center gap-1 mx-auto"
+              style={{ color: style.primaryColor }}
+            >
+              <Plus className="w-4 h-4" />
+              Add Links
+            </button>
+          )}
+
+          {showAddLinks && (
+            <div className="mt-3 space-y-2 max-w-md mx-auto">
+              {!data.linkedin && (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const input = e.currentTarget.elements.namedItem('linkedinInput') as HTMLInputElement;
+                    if (input.value.trim()) {
+                      handleAddLink('linkedin', input.value);
+                      input.value = '';
+                      setShowAddLinks(false);
+                    }
+                  }}
+                  className="flex gap-2"
+                >
+                  <Linkedin className="w-5 h-5 text-blue-600 mt-1.5" />
+                  <input
+                    name="linkedinInput"
+                    type="url"
+                    placeholder="LinkedIn URL (https://linkedin.com/in/...)"
+                    className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    type="submit"
+                    className="px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                  >
+                    Add
+                  </button>
+                </form>
+              )}
+
+              {!data.github && (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const input = e.currentTarget.elements.namedItem('githubInput') as HTMLInputElement;
+                    if (input.value.trim()) {
+                      handleAddLink('github', input.value);
+                      input.value = '';
+                      setShowAddLinks(false);
+                    }
+                  }}
+                  className="flex gap-2"
+                >
+                  <Github className="w-5 h-5 text-gray-700 mt-1.5" />
+                  <input
+                    name="githubInput"
+                    type="url"
+                    placeholder="GitHub URL (https://github.com/...)"
+                    className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    type="submit"
+                    className="px-3 py-1.5 text-sm bg-gray-700 text-white rounded hover:bg-gray-800"
+                  >
+                    Add
+                  </button>
+                </form>
+              )}
+
+              {!data.website && (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const input = e.currentTarget.elements.namedItem('websiteInput') as HTMLInputElement;
+                    if (input.value.trim()) {
+                      handleAddLink('website', input.value);
+                      input.value = '';
+                      setShowAddLinks(false);
+                    }
+                  }}
+                  className="flex gap-2"
+                >
+                  <Globe className="w-5 h-5 text-gray-700 mt-1.5" />
+                  <input
+                    name="websiteInput"
+                    type="url"
+                    placeholder="Portfolio URL (https://yoursite.com)"
+                    className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    type="submit"
+                    className="px-3 py-1.5 text-sm bg-gray-700 text-white rounded hover:bg-gray-800"
+                  >
+                    Add
+                  </button>
+                </form>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

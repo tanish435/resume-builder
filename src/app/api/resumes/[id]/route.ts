@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { z } from 'zod';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 // Validation schemas (same as in route.ts)
 const PersonalInfoSchema = z.object({
@@ -85,6 +87,15 @@ export async function GET(
   { params }: RouteParams
 ) {
   try {
+    // Check authentication
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { id } = params;
 
     // Validate ID format
@@ -98,9 +109,12 @@ export async function GET(
       );
     }
 
-    // Fetch resume from database
-    const resume = await prisma.resume.findUnique({
-      where: { id },
+    // Fetch resume from database - ensure it belongs to the user
+    const resume = await prisma.resume.findFirst({
+      where: { 
+        id,
+        userId: session.user.id, // Only get user's own resumes
+      },
       include: {
         sections: {
           orderBy: {
@@ -154,6 +168,15 @@ export async function PUT(
   { params }: RouteParams
 ) {
   try {
+    // Check authentication
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { id } = params;
     const body = await request.json();
 
@@ -171,9 +194,12 @@ export async function PUT(
     // Validate request body
     const validatedData = ResumeUpdateSchema.parse(body);
 
-    // Check if resume exists
-    const existingResume = await prisma.resume.findUnique({
-      where: { id },
+    // Check if resume exists and belongs to user
+    const existingResume = await prisma.resume.findFirst({
+      where: { 
+        id,
+        userId: session.user.id, // Only allow updating own resumes
+      },
       include: { sections: true },
     });
 
@@ -295,6 +321,15 @@ export async function DELETE(
   { params }: RouteParams
 ) {
   try {
+    // Check authentication
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { id } = params;
 
     // Validate ID
@@ -308,9 +343,12 @@ export async function DELETE(
       );
     }
 
-    // Check if resume exists
-    const existingResume = await prisma.resume.findUnique({
-      where: { id },
+    // Check if resume exists and belongs to user
+    const existingResume = await prisma.resume.findFirst({
+      where: { 
+        id,
+        userId: session.user.id, // Only allow deleting own resumes
+      },
     });
 
     if (!existingResume) {

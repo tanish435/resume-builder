@@ -1,73 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { z } from 'zod';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
-// Validation schema for resume creation/update
-const PersonalInfoSchema = z.object({
-  fullName: z.string().min(1, 'Full name is required'),
-  email: z.string().email('Invalid email address'),
-  phone: z.string().optional(),
-  location: z.string().optional(),
-  title: z.string().optional(),
-  summary: z.string().optional(),
-  linkedin: z.string().url().optional().or(z.literal('')),
-  github: z.string().url().optional().or(z.literal('')),
-  website: z.string().url().optional().or(z.literal('')),
-});
-
-const EducationItemSchema = z.object({
-  id: z.string(),
-  institution: z.string().min(1, 'Institution is required'),
-  degree: z.string().min(1, 'Degree is required'),
-  field: z.string().optional(),
-  startDate: z.string(),
-  endDate: z.string().optional(),
-  gpa: z.string().optional(),
-  description: z.string().optional(),
-});
-
-const ExperienceItemSchema = z.object({
-  id: z.string(),
-  company: z.string().min(1, 'Company is required'),
-  position: z.string().min(1, 'Position is required'),
-  location: z.string().optional(),
-  startDate: z.string(),
-  endDate: z.string().optional(),
-  current: z.boolean().optional(),
-  description: z.string().optional(),
-  achievements: z.array(z.string()).optional(),
-});
-
-const SkillItemSchema = z.object({
-  id: z.string(),
-  name: z.string().min(1, 'Skill name is required'),
-  level: z.enum(['Beginner', 'Intermediate', 'Advanced', 'Expert']).optional(),
-  category: z.string().optional(),
-});
-
-const ProjectItemSchema = z.object({
-  id: z.string(),
-  name: z.string().min(1, 'Project name is required'),
-  description: z.string().optional(),
-  technologies: z.array(z.string()).optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  url: z.string().url().optional().or(z.literal('')),
-  github: z.string().url().optional().or(z.literal('')),
-  highlights: z.array(z.string()).optional(),
+// Validation schema for resume creation
+const SectionSchema = z.object({
+  type: z.string(),
+  data: z.any(), // Flexible data structure for different section types
+  order: z.number(),
+  isVisible: z.boolean().optional().default(true),
 });
 
 const ResumeCreateSchema = z.object({
   title: z.string().min(1, 'Resume title is required'),
-  personalInfo: PersonalInfoSchema,
-  template: z.string().default('modern'),
-  theme: z.string().default('blue'),
-  sections: z.object({
-    education: z.array(EducationItemSchema).optional(),
-    experience: z.array(ExperienceItemSchema).optional(),
-    skills: z.array(SkillItemSchema).optional(),
-    projects: z.array(ProjectItemSchema).optional(),
+  templateId: z.string().optional().default('modern'),
+  styleConfig: z.object({
+    primaryColor: z.string().optional(),
+    textColor: z.string().optional(),
+    backgroundColor: z.string().optional(),
+    fontFamily: z.string().optional(),
+    fontSize: z.number().optional(),
+    lineHeight: z.number().optional(),
+    spacing: z.string().optional(),
   }).optional(),
+  sections: z.array(SectionSchema).optional().default([]),
+  isPublic: z.boolean().optional().default(false),
 });
 
 /**
@@ -76,61 +34,48 @@ const ResumeCreateSchema = z.object({
  */
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
 
     // Validate request body
     const validatedData = ResumeCreateSchema.parse(body);
 
     // Create resume in database
-    // Note: Using a default user ID for now (will be replaced with auth)
-    const userId = 'default-user-id';
+    const userId = session.user.id;
 
-    const sectionsToCreate: any[] = [];
-    let order = 0;
-
-    if (validatedData.sections?.education) {
-      sectionsToCreate.push({
-        type: 'EDUCATION' as const,
-        data: validatedData.sections.education,
-        order: order++,
-      });
-    }
-
-    if (validatedData.sections?.experience) {
-      sectionsToCreate.push({
-        type: 'EXPERIENCE' as const,
-        data: validatedData.sections.experience,
-        order: order++,
-      });
-    }
-
-    if (validatedData.sections?.skills) {
-      sectionsToCreate.push({
-        type: 'SKILLS' as const,
-        data: validatedData.sections.skills,
-        order: order++,
-      });
-    }
-
-    if (validatedData.sections?.projects) {
-      sectionsToCreate.push({
-        type: 'PROJECTS' as const,
-        data: validatedData.sections.projects,
-        order: order++,
-      });
-    }
+    // Prepare sections data - sections come as an array already
+    const sectionsToCreate = validatedData.sections?.map(section => ({
+      type: section.type as any, // Cast to match Prisma SectionType enum
+      data: section.data,
+      order: section.order,
+      isVisible: section.isVisible,
+    })) || [];
 
     const resume = await prisma.resume.create({
       data: {
         userId,
         title: validatedData.title,
-        templateId: validatedData.template,
+        templateId: validatedData.templateId || 'modern',
+        styleConfig: validatedData.styleConfig || {},
+        isPublic: validatedData.isPublic || false,
         sections: {
           create: sectionsToCreate,
         },
       },
       include: {
-        sections: true,
+        sections: {
+          orderBy: {
+            order: 'asc',
+          },
+        },
       },
     });
 
@@ -178,6 +123,15 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
+    // Check authentication
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
 
     // Parse query parameters
@@ -198,31 +152,33 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Build where clause for search
-    const where = search
-      ? {
-          OR: [
-            {
-              title: {
-                contains: search,
-                mode: 'insensitive' as const,
-              },
-            },
-            {
-              personalInfo: {
-                path: ['fullName'],
-                string_contains: search,
-              },
-            },
-            {
-              personalInfo: {
-                path: ['email'],
-                string_contains: search,
-              },
-            },
-          ],
-        }
-      : {};
+    // Build where clause for search and user filter
+    const where: any = {
+      userId: session.user.id, // Filter by authenticated user
+    };
+
+    if (search) {
+      where.OR = [
+        {
+          title: {
+            contains: search,
+            mode: 'insensitive' as const,
+          },
+        },
+        {
+          personalInfo: {
+            path: ['fullName'],
+            string_contains: search,
+          },
+        },
+        {
+          personalInfo: {
+            path: ['email'],
+            string_contains: search,
+          },
+        },
+      ];
+    }
 
     // Fetch resumes with pagination
     const [resumes, total] = await Promise.all([

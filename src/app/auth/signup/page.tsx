@@ -17,6 +17,7 @@ export default function SignUpPage() {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -53,19 +54,8 @@ export default function SignUpPage() {
         throw new Error(data.error || 'Failed to create account');
       }
 
-      // Auto sign in after successful registration
-      const result = await signIn('credentials', {
-        identifier: formData.email,
-        password: formData.password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setError(result.error);
-      } else if (result?.ok) {
-        router.push('/');
-        router.refresh();
-      }
+      // Show success message about email verification
+      setSuccess(true);
     } catch (err: any) {
       setError(err.message || 'An error occurred during registration');
     } finally {
@@ -82,6 +72,60 @@ export default function SignUpPage() {
       setIsLoading(false);
     }
   };
+
+  // Show success page
+  if (success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+              Check Your Email
+            </h2>
+          </div>
+
+          <div className="mt-8 bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <div className="text-center">
+              <svg
+                className="h-16 w-16 mx-auto text-blue-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+              <h3 className="mt-4 text-xl font-medium text-gray-900">
+                Account Created Successfully!
+              </h3>
+              <p className="mt-2 text-gray-600">
+                We've sent a verification link to <strong>{formData.email}</strong>
+              </p>
+              <p className="mt-4 text-sm text-gray-500">
+                Please check your email and click the verification link to activate your account.
+                The link will expire in 24 hours.
+              </p>
+              <div className="mt-6 space-y-3">
+                <Link
+                  href="/auth/signin"
+                  className="block w-full text-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                >
+                  Go to Sign In
+                </Link>
+                <p className="text-xs text-gray-500">
+                  Didn't receive the email? Check your spam folder.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">

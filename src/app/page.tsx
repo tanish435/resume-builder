@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setResume } from '@/store/slices/resumeSlice';
 import { setActiveTemplate } from '@/store/slices/templateSlice';
@@ -8,24 +10,104 @@ import { setStyle } from '@/store/slices/styleSlice';
 import { initializeHistory } from '@/store/slices/historySlice';
 import ResumeCanvas from '@/components/resume/ResumeCanvas';
 import EditorPanel from '@/components/editor/EditorPanel';
+import { LoadingSpinner } from '@/components/ui/Loading';
+import { resumeApi } from '@/lib/api';
 import { Resume, Section, SectionType, PersonalInfoData, SummaryData, ExperienceData, EducationData } from '@/types/schema';
 
+interface ResumeWithSections extends Resume {
+  sections: Section[];
+}
+
 export default function Home() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { data: session, status } = useSession();
   const dispatch = useAppDispatch();
+  
   const sections = useAppSelector((state) => state.resume.sections);
   const currentResume = useAppSelector((state) => state.resume.currentResume);
   const currentStyle = useAppSelector((state) => state.style.currentStyle);
   const activeTemplateId = useAppSelector((state) => state.template.activeTemplateId);
   const historyInitialized = useAppSelector((state) => state.history.present !== null);
+  
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Initialize with sample data
+  // Redirect if not authenticated
   useEffect(() => {
-    // Sample resume data
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin?callbackUrl=/');
+    }
+  }, [status, router]);
+
+  // Load resume data from API or URL parameter
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user?.id) {
+      loadResumeData();
+    }
+  }, [status, session, searchParams]);
+
+  const loadResumeData = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+
+      // Check if specific resume is requested via URL
+      const resumeId = searchParams.get('resumeId');
+      
+      if (resumeId) {
+        // Load specific resume
+        const result = await resumeApi.get(resumeId);
+        if (result.success && result.data) {
+          const resume = result.data as ResumeWithSections;
+          dispatch(setResume(resume));
+          dispatch(setActiveTemplate(resume.templateId));
+          dispatch(setStyle(resume.styleConfig));
+        } else {
+          throw new Error(result.error || 'Failed to load resume');
+        }
+      } else {
+        // Load user's resumes and use the first one or create new
+        const result = await resumeApi.list();
+        
+        if (result.success && result.data && result.data.length > 0) {
+          // Use the most recently edited resume
+          const resumes = result.data as ResumeWithSections[];
+          const latestResume = resumes.sort((a, b) => 
+            new Date(b.lastEditedAt || b.updatedAt).getTime() - 
+            new Date(a.lastEditedAt || a.updatedAt).getTime()
+          )[0];
+          
+          dispatch(setResume(latestResume));
+          dispatch(setActiveTemplate(latestResume.templateId));
+          dispatch(setStyle(latestResume.styleConfig));
+          
+          // Update URL with resumeId
+          router.replace(`/?resumeId=${latestResume.id}`);
+        } else {
+          // No resumes exist, redirect to dashboard to create one
+          router.push('/dashboard');
+          return;
+        }
+      }
+    } catch (err: any) {
+      console.error('Error loading resume:', err);
+      setError(err.message || 'Failed to load resume');
+      
+      // Fall back to sample data if API fails
+      loadSampleData();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadSampleData = () => {
+    // Sample resume data as fallback
     const now = new Date().toISOString();
     
     const sampleResume: Resume = {
       id: 'sample-resume-1',
-      userId: 'user-1',
+      userId: session?.user?.id || 'user-1',
       title: 'My Professional Resume',
       templateId: 'modern',
       styleConfig: {
@@ -43,7 +125,6 @@ export default function Home() {
       lastEditedAt: now,
     };
 
-    // Sample sections with Projects and Skills
     const sampleSections: Section[] = [
       {
         id: 'section-1',
@@ -69,7 +150,7 @@ export default function Home() {
         resumeId: 'sample-resume-1',
         type: SectionType.SUMMARY,
         data: {
-          content: 'Passionate Full Stack Developer with 5+ years of experience building scalable web applications. Specialized in React, Node.js, and cloud technologies. Proven track record of delivering high-quality software solutions that drive business growth.',
+          content: 'Passionate Full Stack Developer with 5+ years of experience building scalable web applications. Specialized in React, Node.js, and cloud technologies.',
         } as SummaryData,
         order: 1,
         isVisible: true,
@@ -134,8 +215,8 @@ export default function Home() {
           entries: [
             {
               id: 'proj-1',
-              name: 'Project management application',
-              description: 'Created this project using next.js, typescript, mongoDB. Made the backend design and took end-to-end ownership of this project. Designed the frontend components with the help of tailwind css and shadcn',
+              name: 'Project Management Application',
+              description: 'Created this project using Next.js, TypeScript, MongoDB. Made the backend design and took end-to-end ownership.',
               technologies: ['Next.js', 'TypeScript', 'MongoDB', 'Tailwind CSS', 'ShadCN'],
               highlights: [],
               url: undefined,
@@ -185,16 +266,14 @@ export default function Home() {
       },
     ];
 
-    // Dispatch to Redux store
     dispatch(setResume({ ...sampleResume, sections: sampleSections }));
     dispatch(setActiveTemplate('modern'));
     dispatch(setStyle(sampleResume.styleConfig));
-  }, [dispatch]);
+  };
 
   // Initialize history after state is loaded
   useEffect(() => {
-    // Only initialize history once we have data and haven't initialized yet
-    if (sections.length > 0 && currentResume && !historyInitialized) {
+    if (sections.length > 0 && currentResume && !historyInitialized && !isLoading) {
       dispatch(initializeHistory({
         resume: currentResume,
         sections: sections,
@@ -202,7 +281,54 @@ export default function Home() {
         template: activeTemplateId,
       }));
     }
-  }, [dispatch, sections, currentResume, currentStyle, activeTemplateId, historyInitialized]);
+  }, [dispatch, sections, currentResume, currentStyle, activeTemplateId, historyInitialized, isLoading]);
+
+  // Show loading state
+  if (status === 'loading' || isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <LoadingSpinner size="xl" label="Loading your resume..." />
+      </div>
+    );
+  }
+
+  // Redirect for unauthenticated users
+  if (status === 'unauthenticated') {
+    return null;
+  }
+
+  // Show error state
+  if (error && !currentResume) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <svg
+            className="mx-auto h-12 w-12 text-red-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">Error loading resume</h3>
+          <p className="mt-1 text-sm text-gray-500">{error}</p>
+          <div className="mt-6">
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+            >
+              Go to Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

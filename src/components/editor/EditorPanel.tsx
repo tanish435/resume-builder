@@ -7,6 +7,7 @@ import StyleCustomizer from './StyleCustomizer';
 import TemplateSelector from './TemplateSelector';
 import ExportControls from './ExportControls';
 import HistoryControls from './HistoryControls';
+import ResumeSwitcher from './ResumeSwitcher';
 
 type EditorTab = 'sections' | 'style' | 'templates' | 'export';
 
@@ -47,6 +48,13 @@ export default function EditorPanel({ className = '' }: EditorPanelProps) {
           <ChevronLeft className="w-4 h-4 text-gray-600" />
         )}
       </button>
+
+      {/* Resume Switcher */}
+      {!isCollapsed && (
+        <div className="px-4 pt-4 pb-2">
+          <ResumeSwitcher />
+        </div>
+      )}
 
       {/* History Controls */}
       {!isCollapsed && <HistoryControls />}

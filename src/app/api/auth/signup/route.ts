@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import crypto from 'crypto';
 import prisma from '@/lib/prisma';
+import { sendVerificationEmail } from '@/lib/email';
 import type { Prisma } from '@prisma/client';
 
 // Validation schema for user registration
@@ -54,6 +56,10 @@ export async function POST(request: NextRequest) {
       .toUpperCase()
       .slice(0, 2);
 
+    // Generate verification token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
     // Create user
     const user = await prisma.user.create({
       data: {
@@ -62,8 +68,9 @@ export async function POST(request: NextRequest) {
         username: validatedData.username.toLowerCase(),
         password: hashedPassword,
         initials,
-        isVerified: false, // Set to true if you don't have email verification
-        // isVerified: true, // Uncomment this if you don't need email verification
+        isVerified: false, // User must verify email
+        verificationToken,
+        verificationTokenExpiry,
       },
       select: {
         id: true,
@@ -75,11 +82,24 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    // Send verification email (don't wait for it to avoid delays)
+    sendVerificationEmail(user.email, user.name || 'User', verificationToken)
+      .then((result) => {
+        if (result.success) {
+          console.log('Verification email sent to:', user.email);
+        } else {
+          console.error('Failed to send verification email:', result.error);
+        }
+      })
+      .catch((error) => {
+        console.error('Error sending verification email:', error);
+      });
+
     return NextResponse.json(
       {
         success: true,
         data: user,
-        message: 'Account created successfully',
+        message: 'Account created successfully! Please check your email to verify your account.',
       },
       { status: 201 }
     );

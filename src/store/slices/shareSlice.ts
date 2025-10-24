@@ -53,13 +53,12 @@ export const createShareLink = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await fetch('/api/share', {
+      const response = await fetch(`/api/share/${resumeId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          resumeId,
           expiresInDays: expiresInDays ?? null,
         }),
       });
@@ -69,8 +68,23 @@ export const createShareLink = createAsyncThunk(
         return rejectWithValue(error.error || 'Failed to create share link');
       }
 
-      const data: ShareLinkResponse = await response.json();
-      return data;
+      const result = await response.json();
+      
+      // Transform API response to ShareLinkResponse format
+      if (result.success && result.data) {
+        return {
+          id: result.data.slug, // Use slug as ID temporarily
+          resumeId,
+          slug: result.data.slug,
+          shareUrl: result.data.url,
+          isActive: true,
+          expiresAt: result.data.expiresAt ? new Date(result.data.expiresAt) : null,
+          viewCount: 0,
+          createdAt: new Date(),
+        } as ShareLinkResponse;
+      }
+      
+      throw new Error('Invalid response format');
     } catch (error: any) {
       return rejectWithValue(error.message || 'Network error');
     }

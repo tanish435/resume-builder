@@ -1,5 +1,6 @@
 import { Middleware } from '@reduxjs/toolkit';
 import { setSaving, saveCompleted, setError } from '../slices/resumeSlice';
+import { resumeApi, handleApiError } from '@/lib/api';
 
 // Actions that should trigger auto-save
 const AUTO_SAVE_ACTIONS = [
@@ -54,33 +55,28 @@ export const autoSaveMiddleware: Middleware =
     return result;
   };
 
-// API save function (will be implemented when API routes are ready)
+// API save function using the API client
 async function saveResumeToAPI(state: any): Promise<void> {
   const { currentResume, sections } = state.resume;
+  const { currentStyle } = state.style;
+  const { activeTemplateId } = state.template;
   
   if (!currentResume) {
     throw new Error('No resume to save');
   }
 
-  // This will be replaced with actual API call
-  const response = await fetch(`/api/resumes/${currentResume.id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      title: currentResume.title,
-      templateId: currentResume.templateId,
-      styleConfig: currentResume.styleConfig,
-      sections: sections,
-    }),
+  // Use the API client to update the resume
+  const result = await resumeApi.update(currentResume.id, {
+    title: currentResume.title,
+    templateId: activeTemplateId,
+    styleConfig: currentStyle,
+    sections: sections,
+    isPublic: currentResume.isPublic,
   });
 
-  if (!response.ok) {
-    throw new Error('Failed to save resume');
+  if (!result.success) {
+    throw new Error(handleApiError(result));
   }
-
-  return response.json();
 }
 
 // Export for manual save trigger
