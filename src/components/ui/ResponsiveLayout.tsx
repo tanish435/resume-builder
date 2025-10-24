@@ -43,21 +43,6 @@ export function ResponsiveLayout({
                 )}
               </button>
 
-              {/* Desktop Sidebar Toggle */}
-              {collapsible && (
-                <button
-                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                  className="hidden lg:flex p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  aria-label="Toggle sidebar"
-                >
-                  {isSidebarOpen ? (
-                    <ChevronLeft className="w-5 h-5" />
-                  ) : (
-                    <ChevronRight className="w-5 h-5" />
-                  )}
-                </button>
-              )}
-
               <div className="flex-1">{header}</div>
             </div>
           </div>
@@ -82,14 +67,25 @@ export function ResponsiveLayout({
             ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
             lg:translate-x-0
             ${!isSidebarOpen && 'lg:hidden'}
-            w-full sm:w-80 lg:w-[${sidebarWidth}]
+            w-80 lg:w-[${sidebarWidth}]
             overflow-y-auto custom-scrollbar
           `}
-          style={{ width: isMobileMenuOpen ? '100%' : undefined }}
         >
-          <div className="h-full">
+          <div className="h-full relative">
+            {/* Desktop Sidebar Toggle - Positioned on sidebar edge */}
+            {collapsible && isSidebarOpen && (
+              <button
+                onClick={() => setIsSidebarOpen(false)}
+                className="hidden lg:flex absolute top-4 -right-3 z-50 p-1.5 bg-white border border-gray-200 rounded-full shadow-md hover:bg-gray-50 transition-colors"
+                aria-label="Close sidebar"
+              >
+                <ChevronLeft className="w-4 h-4 text-gray-600" />
+              </button>
+            )}
+
             {/* Mobile Close Button */}
-            <div className="lg:hidden flex justify-end p-4 border-b">
+            <div className="lg:hidden sticky top-0 z-10 bg-white flex justify-between items-center p-4 border-b">
+              <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -102,6 +98,17 @@ export function ResponsiveLayout({
             {sidebar}
           </div>
         </aside>
+
+        {/* Desktop Sidebar Toggle - When Closed */}
+        {collapsible && !isSidebarOpen && (
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="hidden lg:flex fixed left-0 top-20 z-30 p-1.5 bg-white border border-gray-200 rounded-r-full shadow-md hover:bg-gray-50 transition-colors"
+            aria-label="Open sidebar"
+          >
+            <ChevronRight className="w-4 h-4 text-gray-600" />
+          </button>
+        )}
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto custom-scrollbar bg-gray-50">

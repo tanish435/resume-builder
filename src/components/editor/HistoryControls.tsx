@@ -74,20 +74,7 @@ export default function HistoryControls() {
         )}
       </button>
 
-      {/* Divider */}
-      {lastAction && (
-        <>
-          <div className="h-8 w-px bg-gray-300" />
-          
-          {/* Last Action Display */}
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <span className="font-medium">Last action:</span>
-            <span className="text-gray-700 bg-gray-50 px-2 py-1 rounded">
-              {lastAction}
-            </span>
-          </div>
-        </>
-      )}
+      
 
       {/* Help Text */}
       <div className="ml-auto text-xs text-gray-400">

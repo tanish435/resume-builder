@@ -31,14 +31,14 @@ export default function EditorPanel({ className = '' }: EditorPanelProps) {
 
   return (
     <div
-      className={`editor-panel no-print bg-white border-r border-gray-200 transition-all duration-300 ${
+      className={`editor-panel no-print bg-white border-r border-gray-200 transition-all duration-300 relative ${
         isCollapsed ? 'w-16' : 'w-80'
       } ${className}`}
     >
-      {/* Collapse/Expand Button */}
+      {/* Collapse/Expand Button - Positioned on the right edge of sidebar */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-3 top-4 z-20 bg-white border border-gray-200 rounded-full p-1 hover:bg-gray-50 shadow-md"
+        className="absolute right-4 top-4 z-20 bg-white border border-gray-200 rounded-full p-1.5 hover:bg-gray-50 shadow-sm transition-all"
         title={isCollapsed ? 'Expand panel' : 'Collapse panel'}
       >
         {isCollapsed ? (
