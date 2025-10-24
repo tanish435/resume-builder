@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { useAppSelector } from '@/store/hooks';
-import { Download, FileJson, FileText, Printer, Save, Share2, Loader2 } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { Download, FileJson, FileText, Printer, Save, Share2, Loader2, Upload } from 'lucide-react';
 import {
   exportResumeSafe,
   PDF_EXPORT_PRESETS,
@@ -11,17 +11,22 @@ import {
   type ExportProgress,
 } from '@/lib/pdfExport';
 import ShareButton from './ShareButton';
+import { setResume } from '@/store/slices/resumeSlice';
+import { setStyle } from '@/store/slices/styleSlice';
+import { initializeHistory } from '@/store/slices/historySlice';
 
 /**
  * Export Controls Component
  * Export resume in various formats (PDF, JSON, print)
  */
 export default function ExportControls() {
+  const dispatch = useAppDispatch();
   const { currentResume, sections } = useAppSelector((state) => state.resume);
   const { currentStyle } = useAppSelector((state) => state.style);
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState<ExportProgress | null>(null);
   const [exportQuality, setExportQuality] = useState<'high' | 'standard' | 'fast'>('standard');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePrint = () => {
     window.print();
@@ -105,19 +110,90 @@ export default function ExportControls() {
   };
 
   const handleSave = () => {
-    // This would normally save to the backend
-    // For now, we'll just save to localStorage
+    // Save to localStorage and download as JSON backup
     if (!currentResume) return;
 
-    const saveData = {
-      resume: currentResume,
-      sections,
-      style: currentStyle,
-      savedAt: new Date().toISOString(),
+    try {
+      const saveData = {
+        resume: currentResume,
+        sections,
+        style: currentStyle,
+        savedAt: new Date().toISOString(),
+      };
+
+      // Save to localStorage
+      localStorage.setItem(`resume-${currentResume.id}`, JSON.stringify(saveData));
+
+      // Also download as JSON file for backup
+      const blob = new Blob([JSON.stringify(saveData, null, 2)], {
+        type: 'application/json',
+      });
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+      a.download = `${currentResume.title.replace(/\s+/g, '-').toLowerCase()}-${timestamp}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      alert('✅ Resume saved successfully!\n\n• Saved to browser storage\n• Downloaded as JSON backup file');
+    } catch (error) {
+      console.error('Save failed:', error);
+      alert('❌ Failed to save resume. Please try again.');
+    }
+  };
+
+  const handleLoadJSON = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const data = JSON.parse(content);
+
+        // Validate the data structure
+        if (!data.resume || !data.sections) {
+          throw new Error('Invalid resume file format');
+        }
+
+        // Load the resume into Redux store
+        dispatch(setResume({ ...data.resume, sections: data.sections }));
+        
+        // Load style if available
+        if (data.style) {
+          dispatch(setStyle(data.style));
+        }
+
+        // Initialize history with loaded data
+        dispatch(initializeHistory({
+          resume: data.resume,
+          sections: data.sections,
+          style: data.style || currentStyle,
+          template: data.resume.templateId,
+        }));
+
+        alert('✅ Resume loaded successfully!');
+      } catch (error) {
+        console.error('Load failed:', error);
+        alert('❌ Failed to load resume file. Please make sure it\'s a valid JSON file exported from this application.');
+      }
     };
 
-    localStorage.setItem(`resume-${currentResume.id}`, JSON.stringify(saveData));
-    alert('Resume saved locally!');
+    reader.readAsText(file);
+    
+    // Reset input value so same file can be selected again
+    if (event.target) {
+      event.target.value = '';
+    }
   };
 
   return (
@@ -243,9 +319,32 @@ export default function ExportControls() {
           </div>
           <div className="flex-1 text-left">
             <h4 className="font-semibold text-gray-800">Save Locally</h4>
-            <p className="text-xs text-gray-600">Save to browser storage</p>
+            <p className="text-xs text-gray-600">Save to browser & download backup</p>
           </div>
         </button>
+
+        {/* Load from File */}
+        <button
+          onClick={handleLoadJSON}
+          className="w-full flex items-center gap-3 p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition-all group"
+        >
+          <div className="flex-shrink-0 w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+            <Upload className="w-5 h-5 text-orange-600" />
+          </div>
+          <div className="flex-1 text-left">
+            <h4 className="font-semibold text-gray-800">Load Resume</h4>
+            <p className="text-xs text-gray-600">Import from JSON file</p>
+          </div>
+        </button>
+        
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json,application/json"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
 
         {/* Share Online */}
         <div className="w-full">
@@ -259,6 +358,12 @@ export default function ExportControls() {
           <p className="text-xs text-blue-800">
             <strong>Professional PDF Export:</strong> Choose quality level and click "Export PDF"
             for a high-quality, multi-page PDF download with preserved formatting.
+          </p>
+        </div>
+
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+          <p className="text-xs text-purple-800">
+            <strong>Save & Load:</strong> "Save Locally" stores your resume in browser storage AND downloads a JSON backup file. Use "Load Resume" to import a previously saved JSON file.
           </p>
         </div>
 

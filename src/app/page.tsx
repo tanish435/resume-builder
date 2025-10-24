@@ -43,7 +43,7 @@ export default function Home() {
       lastEditedAt: now,
     };
 
-    // Sample sections
+    // Sample sections with Projects and Skills
     const sampleSections: Section[] = [
       {
         id: 'section-1',
@@ -122,6 +122,63 @@ export default function Home() {
           ],
         } as EducationData,
         order: 3,
+        isVisible: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        id: 'section-5',
+        resumeId: 'sample-resume-1',
+        type: SectionType.PROJECTS,
+        data: {
+          entries: [
+            {
+              id: 'proj-1',
+              name: 'Project management application',
+              description: 'Created this project using next.js, typescript, mongoDB. Made the backend design and took end-to-end ownership of this project. Designed the frontend components with the help of tailwind css and shadcn',
+              technologies: ['Next.js', 'TypeScript', 'MongoDB', 'Tailwind CSS', 'ShadCN'],
+              highlights: [],
+              url: undefined,
+              startDate: undefined,
+              endDate: undefined,
+            },
+            {
+              id: 'proj-2',
+              name: 'Blogging Application',
+              description: 'A full-stack blogging platform with user authentication, rich text editor, and comment system.',
+              technologies: ['React', 'Node.js', 'PostgreSQL'],
+              highlights: [],
+              url: undefined,
+              startDate: undefined,
+              endDate: undefined,
+            },
+          ],
+        },
+        order: 4,
+        isVisible: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        id: 'section-6',
+        resumeId: 'sample-resume-1',
+        type: SectionType.SKILLS,
+        data: {
+          categories: [
+            {
+              id: 'cat-1',
+              name: 'Frontend',
+              skills: ['Next.js', 'React.js', 'Tailwind CSS', 'TypeScript'],
+            },
+            {
+              id: 'cat-2',
+              name: 'Backend',
+              skills: ['MongoDB', 'Node.js', 'Express.js', 'PostgreSQL'],
+            },
+          ],
+          skills: [],
+        },
+        order: 5,
         isVisible: true,
         createdAt: now,
         updatedAt: now,
