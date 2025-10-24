@@ -7,7 +7,7 @@ import { BaseTemplateUtils, TemplateProps, ColumnContainer } from './BaseTemplat
  * Professional Template - Two Column Layout
  * Classic professional design with sidebar for secondary information
  * 
- * Layout: Two columns (30% left sidebar, 70% main content)
+ * Layout: Two columns (35% left sidebar, 65% main content)
  * Left Column: Skills, Languages, Certifications, Interests
  * Right Column: Personal Info, Summary, Experience, Education, Projects
  * Style: Traditional, corporate, ATS-friendly
@@ -43,49 +43,77 @@ export default function ProfessionalTemplate({ resume, sections, style }: Templa
     rightColumnTypes
   );
 
-  // Get spacing
-  const spacing = BaseTemplateUtils.getSpacingClass(style.spacing);
-
   return (
     <div
-      className="professional-template w-full min-h-screen"
-      style={BaseTemplateUtils.getContainerStyles(style)}
+      className="professional-template w-full h-full flex flex-col"
+      style={{
+        ...BaseTemplateUtils.getContainerStyles(style),
+        minHeight: '1123px', // A4 height
+      }}
     >
-      <div className="flex flex-row min-h-screen">
-        {/* Left Sidebar - 30% */}
+      <div className="flex flex-row flex-1 h-full">
+        {/* Left Sidebar - 35% */}
         <div
-          className={`left-sidebar p-8 ${spacing}`}
+          className="left-sidebar"
           style={{
-            width: '30%',
-            minWidth: '280px',
-            backgroundColor: style.accentColor || '#f3f4f6',
-            borderRight: `2px solid ${style.borderColor || '#e5e7eb'}`,
+            width: '35%',
+            maxWidth: '280px',
+            padding: '40px 24px',
+            backgroundColor: style.accentColor || '#f8fafc',
+            borderRight: `1px solid ${style.borderColor || '#e2e8f0'}`,
           }}
         >
           {left.length > 0 ? (
-            BaseTemplateUtils.renderSectionsWithDividers(left, style)
+            <div className="space-y-8">
+              {left.map((section, index) => (
+                <div key={section.id}>
+                  {index > 0 && (
+                    <div className="my-6 border-t border-gray-300"></div>
+                  )}
+                  {BaseTemplateUtils.renderSection(section, style)}
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="text-sm text-gray-500">
-              <p>Add sections like:</p>
-              <ul className="list-disc list-inside mt-2 space-y-1">
-                <li>Skills</li>
-                <li>Languages</li>
-                <li>Certifications</li>
+              <p className="font-medium mb-3 text-gray-700">Sidebar sections:</p>
+              <ul className="list-none space-y-2 text-xs text-gray-600">
+                <li className="flex items-center gap-2">
+                  <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+                  Skills
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+                  Languages
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+                  Certifications
+                </li>
               </ul>
             </div>
           )}
         </div>
 
-        {/* Right Main Content - 70% */}
+        {/* Right Main Content - 65% */}
         <div
-          className={`main-content p-12 ${spacing}`}
+          className="main-content flex-1"
           style={{
-            width: '70%',
-            flex: '1',
+            padding: '40px',
+            backgroundColor: '#ffffff',
           }}
         >
           {right.length > 0 ? (
-            BaseTemplateUtils.renderSectionsWithDividers(right, style)
+            <div className="space-y-8">
+              {right.map((section, index) => (
+                <div key={section.id}>
+                  {index > 0 && index !== 1 && ( // Don't show divider between PersonalInfo and Summary
+                    <div className="my-6 border-t border-gray-200"></div>
+                  )}
+                  {BaseTemplateUtils.renderSection(section, style)}
+                </div>
+              ))}
+            </div>
           ) : (
             BaseTemplateUtils.renderEmptyState()
           )}

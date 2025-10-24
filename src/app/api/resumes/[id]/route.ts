@@ -28,10 +28,16 @@ const ResumeUpdateSchema = z.object({
       left: z.number().optional(),
       right: z.number().optional(),
     }).optional(),
-    spacing: z.object({
-      section: z.number().optional(),
-      paragraph: z.number().optional(),
-    }).optional(),
+    spacing: z.union([
+      z.string(), // Allow string for backward compatibility
+      z.object({
+        section: z.number().optional(),
+        paragraph: z.number().optional(),
+      })
+    ]).optional(),
+    accentColor: z.string().optional(),
+    borderColor: z.string().optional(),
+    borderStyle: z.string().optional(),
   }).optional(),
   sections: z.array(SectionSchema).optional(),
   isPublic: z.boolean().optional(),
