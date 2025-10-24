@@ -37,10 +37,10 @@ export default function MinimalTemplate({ resume, sections, style }: TemplatePro
       className="minimal-template w-full min-h-screen"
       style={BaseTemplateUtils.getContainerStyles(style)}
     >
-      <div className="max-w-3xl mx-auto px-8 py-16">
+      <div className="max-w-3xl mx-auto px-8 py-8">
         {/* Header - Personal Info with Subtle Styling */}
         {personalInfoSection && (
-          <div className="header-section mb-16 text-center">
+          <div className="header-section mb-8 text-center">
             {BaseTemplateUtils.renderWrappedSection(personalInfoSection, style)}
           </div>
         )}
@@ -48,7 +48,7 @@ export default function MinimalTemplate({ resume, sections, style }: TemplatePro
         {/* Subtle Divider */}
         {personalInfoSection && (
           <div
-            className="divider mb-16 mx-auto rounded-full"
+            className="divider mb-8 mx-auto rounded-full"
             style={{
               height: '2px',
               width: '80px',
@@ -57,7 +57,7 @@ export default function MinimalTemplate({ resume, sections, style }: TemplatePro
           />
         )}
 
-        {/* Main Content with Maximum Spacing */}
+        {/* Main Content with Balanced Spacing */}
         <div className={`main-content ${spacing}`}>
           {contentSections.length > 0 ? (
             contentSections.map((section, index) => (
@@ -67,7 +67,7 @@ export default function MinimalTemplate({ resume, sections, style }: TemplatePro
                 {/* Subtle section divider (except last section) */}
                 {index < contentSections.length - 1 && style.borderStyle && style.borderStyle !== 'none' && (
                   <div
-                    className="section-divider my-12 mx-auto rounded-full"
+                    className="section-divider my-6 mx-auto rounded-full"
                     style={{
                       height: style.borderStyle === 'dashed' ? '2px' : '1px',
                       width: '60px',
@@ -89,7 +89,7 @@ export default function MinimalTemplate({ resume, sections, style }: TemplatePro
         </div>
 
         {/* Footer Space */}
-        <div className="footer-space h-16" />
+        <div className="footer-space h-8" />
       </div>
     </div>
   );
