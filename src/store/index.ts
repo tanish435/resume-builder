@@ -8,6 +8,7 @@ import shareReducer from './slices/shareSlice';
 import { historyMiddleware } from './middleware/historyMiddleware';
 import { autoSaveMiddleware } from './middleware/autoSaveMiddleware';
 import { apiSyncMiddleware } from './middleware/apiSyncMiddleware';
+import { styleSyncMiddleware } from './middleware/styleSyncMiddleware';
 
 export const store = configureStore({
   reducer: {
@@ -29,6 +30,7 @@ export const store = configureStore({
         ignoredPaths: ['history.past', 'history.future'],
       },
     })
+      .concat(styleSyncMiddleware)  // Must come before apiSyncMiddleware
       .concat(historyMiddleware)
       .concat(autoSaveMiddleware)
       .concat(apiSyncMiddleware),

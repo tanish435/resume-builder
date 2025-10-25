@@ -27,6 +27,7 @@ const HISTORY_ACTIONS = [
   // Typography
   'style/updateFontFamily',          // Font family changes
   'style/updateFontSize',            // Font size adjustments
+  'style/updateIndividualFontSize',  // Individual font size adjustments
   'style/updateLineHeight',          // Line height adjustments
   
   // Layout
