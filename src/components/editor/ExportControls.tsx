@@ -7,9 +7,8 @@ import {
   exportResumeSafe,
   PDF_EXPORT_PRESETS,
   checkBrowserSupport,
-  estimatePDFSize,
   type ExportProgress,
-} from '@/lib/pdfExport';
+} from '@/lib/pdfExportSimple';
 import ShareButton from './ShareButton';
 import { setResume } from '@/store/slices/resumeSlice';
 import { setStyle } from '@/store/slices/styleSlice';
@@ -76,19 +75,10 @@ export default function ExportControls() {
     });
 
     try {
-      // Get export options based on quality setting
-      const presets = {
-        high: PDF_EXPORT_PRESETS.highQuality,
-        standard: PDF_EXPORT_PRESETS.standard,
-        fast: PDF_EXPORT_PRESETS.fast,
-      };
-
-      const options = presets[exportQuality];
-
-      // Export with progress tracking
+      // Export using browser's native print dialog
       await exportResumeSafe(
         currentResume.title,
-        options,
+        PDF_EXPORT_PRESETS[exportQuality],
         (progress) => {
           setExportProgress(progress);
         }
@@ -97,12 +87,10 @@ export default function ExportControls() {
       // Reset progress after a delay
       setTimeout(() => {
         setExportProgress(null);
-      }, 2000);
+      }, 3000);
     } catch (error) {
       console.error('Export failed:', error);
-      alert(
-        'Failed to export PDF. Please try again.\n\nTip: Try using the "Fast" quality option if you continue to have issues.'
-      );
+      alert('Failed to open print dialog. Please try again.');
       setExportProgress(null);
     } finally {
       setIsExporting(false);
@@ -226,7 +214,7 @@ export default function ExportControls() {
             <div className="flex-1 text-left">
               <h4 className="font-semibold text-gray-800">Export PDF</h4>
               <p className="text-xs text-gray-600">
-                {isExporting ? exportProgress?.message : 'High-quality PDF download'}
+                {isExporting ? exportProgress?.message : 'Open print dialog to save as PDF'}
               </p>
             </div>
           </button>
@@ -356,8 +344,8 @@ export default function ExportControls() {
       <div className="space-y-2">
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
           <p className="text-xs text-blue-800">
-            <strong>Professional PDF Export:</strong> Choose quality level and click "Export PDF"
-            for a high-quality, multi-page PDF download with preserved formatting.
+            <strong>💡 PDF Export:</strong> Click "Export PDF" to open your browser's print dialog. 
+            Then select <strong>"Save as PDF"</strong> as the destination to download your resume.
           </p>
         </div>
 
@@ -369,12 +357,12 @@ export default function ExportControls() {
 
         <div className="bg-green-50 border border-green-200 rounded-lg p-3">
           <p className="text-xs text-green-800">
-            <strong>Quality Options:</strong>
+            <strong>📄 Print Tips:</strong>
           </p>
           <ul className="text-xs text-green-700 mt-1 space-y-0.5 ml-4 list-disc">
-            <li><strong>Fast:</strong> Quick export, smaller file size</li>
-            <li><strong>Standard:</strong> Balanced quality and speed (recommended)</li>
-            <li><strong>High:</strong> Best quality, larger file size</li>
+            <li>In the print dialog, choose "Save as PDF" as destination</li>
+            <li>Make sure "Background graphics" is enabled</li>
+            <li>Use "Portrait" orientation for best results</li>
           </ul>
         </div>
       </div>

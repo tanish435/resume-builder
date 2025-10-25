@@ -62,9 +62,24 @@ export default function EditableContent({
   }, [isActive, isEditing]);
 
   const handleClick = (e: React.MouseEvent) => {
-    if (!isActive) return;
     e.stopPropagation();
     setIsEditing(true);
+    
+    // Auto-focus when clicking
+    setTimeout(() => {
+      if (contentRef.current) {
+        contentRef.current.focus();
+        // Place cursor at end
+        const range = document.createRange();
+        const selection = window.getSelection();
+        if (contentRef.current.childNodes.length > 0) {
+          range.selectNodeContents(contentRef.current);
+          range.collapse(false);
+          selection?.removeAllRanges();
+          selection?.addRange(range);
+        }
+      }
+    }, 0);
   };
 
   const handleBlur = () => {
@@ -155,12 +170,12 @@ export default function EditableContent({
       className={`
         editable-content transition-all duration-150
         ${className}
-        ${isActive && !isEditing ? 'hover:bg-blue-50 hover:outline-1 hover:outline-blue-300' : ''}
+        ${!isEditing ? 'hover:bg-blue-50 hover:outline-1 hover:outline-blue-300' : ''}
         ${isEditing ? 'bg-blue-50 outline-2 outline-blue-500' : ''}
         ${isEmpty ? 'text-gray-400 italic' : ''}
-        ${isActive ? 'cursor-text' : 'cursor-default'}
+        cursor-text
       `}
-      contentEditable={isActive && isEditing}
+      contentEditable={isEditing}
       suppressContentEditableWarning
       onClick={handleClick}
       onBlur={handleBlur}

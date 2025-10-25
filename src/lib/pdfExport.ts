@@ -7,6 +7,26 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
+/**
+ * Simple PDF export using browser's print functionality
+ * More reliable than html2canvas for complex layouts
+ */
+export async function exportResumeToPDFSimple(
+  filename: string = 'resume.pdf'
+): Promise<void> {
+  // Use the browser's print-to-PDF feature
+  // This is more reliable and handles all CSS correctly
+  return new Promise((resolve, reject) => {
+    try {
+      // Trigger browser print dialog
+      window.print();
+      resolve();
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
 export interface PDFExportOptions {
   filename?: string;
   quality?: number; // 0.1 to 1.0
@@ -69,29 +89,86 @@ export async function exportResumeToPDF(
       message: 'Capturing resume layout...',
     });
 
-    // Create high-quality canvas
-    const canvas = await html2canvas(element, {
-      scale: scale,
-      useCORS: true,
-      allowTaint: false,
-      backgroundColor: '#ffffff',
-      logging: false,
-      imageTimeout: 0,
-      onclone: (clonedDoc) => {
-        // Ensure styles are properly cloned
-        const clonedElement = clonedDoc.getElementById(elementId);
-        if (clonedElement) {
-          clonedElement.style.transform = 'none';
-          clonedElement.style.boxShadow = 'none';
-        }
-      },
-    });
+    // Create high-quality canvas with better error handling
+    let canvas;
+    try {
+      canvas = await html2canvas(element, {
+        scale: scale,
+        useCORS: true,
+        allowTaint: true, // Changed to true to allow cross-origin images
+        backgroundColor: '#ffffff',
+        logging: false,
+        imageTimeout: 15000, // Increased timeout
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
+        ignoreElements: (element) => {
+          // Ignore elements with no-print class
+          return element.classList?.contains('no-print') || false;
+        },
+        onclone: (clonedDoc) => {
+          // Ensure styles are properly cloned
+          const clonedElement = clonedDoc.getElementById(elementId);
+          if (clonedElement) {
+            clonedElement.style.transform = 'none';
+            clonedElement.style.boxShadow = 'none';
+            
+            // Remove any problematic elements
+            const noPrintElements = clonedElement.querySelectorAll('.no-print');
+            noPrintElements.forEach((el) => {
+              el.remove();
+            });
+            
+            // Convert modern CSS colors to hex to avoid "lab" color function errors
+            const allElements = clonedElement.querySelectorAll('*');
+            allElements.forEach((el) => {
+              const htmlEl = el as HTMLElement;
+              const computedStyle = window.getComputedStyle(htmlEl);
+              
+              // Convert background colors
+              if (computedStyle.backgroundColor && computedStyle.backgroundColor !== 'transparent') {
+                htmlEl.style.backgroundColor = computedStyle.backgroundColor;
+              }
+              
+              // Convert text colors
+              if (computedStyle.color) {
+                htmlEl.style.color = computedStyle.color;
+              }
+              
+              // Convert border colors
+              if (computedStyle.borderColor && computedStyle.borderColor !== 'transparent') {
+                htmlEl.style.borderColor = computedStyle.borderColor;
+              }
+            });
+          }
+        },
+      });
+    } catch (canvasError) {
+      console.error('html2canvas error:', canvasError);
+      throw new Error(`Failed to capture resume layout: ${canvasError instanceof Error ? canvasError.message : 'Unknown error'}`);
+    }
 
     onProgress?.({
       stage: 'capturing',
       progress: 60,
       message: 'Processing image data...',
     });
+
+    // Convert canvas to image data
+    let imgData;
+    try {
+      imgData = canvas.toDataURL('image/jpeg', quality);
+    } catch (dataUrlError) {
+      console.error('toDataURL error:', dataUrlError);
+      // Try PNG format as fallback
+      try {
+        imgData = canvas.toDataURL('image/png');
+      } catch (pngError) {
+        throw new Error('Failed to convert canvas to image data');
+      }
+    }
+
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
     // Stage 3: PDF Generation
     onProgress?.({
@@ -100,17 +177,19 @@ export async function exportResumeToPDF(
       message: 'Generating PDF document...',
     });
 
-    const imgData = canvas.toDataURL('image/jpeg', quality);
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
     // Initialize PDF
-    const pdf = new jsPDF({
-      orientation: orientation,
-      unit: 'mm',
-      format: format,
-      compress: compress,
-    });
+    let pdf;
+    try {
+      pdf = new jsPDF({
+        orientation: orientation,
+        unit: 'mm',
+        format: format,
+        compress: compress,
+      });
+    } catch (pdfError) {
+      console.error('jsPDF initialization error:', pdfError);
+      throw new Error('Failed to initialize PDF document');
+    }
 
     if (multiPage && imgHeight > pageHeight) {
       // Multi-page handling
@@ -190,7 +269,20 @@ export async function exportResumeWithTitle(
 
   const filename = `${sanitizedTitle}-resume.pdf`;
 
-  return exportResumeToPDF('resume-canvas', { ...options, filename }, onProgress);
+  // Use simple browser print instead
+  onProgress?.({
+    stage: 'preparing',
+    progress: 50,
+    message: 'Opening print dialog...',
+  });
+  
+  await exportResumeToPDFSimple(filename);
+  
+  onProgress?.({
+    stage: 'complete',
+    progress: 100,
+    message: 'Print dialog opened. Select "Save as PDF" to download.',
+  });
 }
 
 /**

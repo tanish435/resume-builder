@@ -27,8 +27,97 @@ body {
 
 /* Print Styles */
 @media print {
+  /* Hide only UI/editing elements, not content */
   .no-print {
     display: none !important;
+    visibility: hidden !important;
+  }
+  
+  /* Ensure full page is printed */
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+  
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 210mm;
+    height: auto;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  /* Resume canvas specific */
+  #resume-canvas {
+    width: 100% !important;
+    min-height: auto !important;
+    max-height: none !important;
+    height: auto !important;
+    page-break-after: auto;
+    background: white !important;
+    box-shadow: none !important;
+    transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  
+  /* Ensure all content is visible */
+  * {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+  
+  /* Template wrappers - remove edit styling */
+  .section-wrapper {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    cursor: default !important;
+  }
+  
+  /* Remove edit mode visual effects */
+  .ring-2,
+  .ring-1,
+  .ring-blue-500,
+  .ring-blue-300 {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* Editable content - remove edit styling */
+  .editable-content {
+    outline: none !important;
+    border: none !important;
+    background: transparent !important;
+    cursor: default !important;
+  }
+  
+  /* Force background colors to print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  /* Ensure skill tags and colored elements print */
+  span[style*="backgroundColor"],
+  div[style*="backgroundColor"] {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  /* Prevent orphans and widows */
+  p, h2, h3 {
+    orphans: 3;
+    widows: 3;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
   }
 }
 

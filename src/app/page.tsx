@@ -345,15 +345,14 @@ export default function Home() {
       {/* Print Styles */}
       <style jsx global>{`
         @media print {
-          /* Set up A4 page size with no margins */
+          /* Set up A4 page size */
           @page {
             size: A4 portrait;
-            margin: 0;
+            margin: 10mm;
           }
 
-          /* Hide all non-printable elements */
-          .no-print,
-          .editor-panel {
+          /* Hide only non-printable elements */
+          .no-print {
             display: none !important;
           }
 
@@ -361,7 +360,7 @@ export default function Home() {
           html,
           body {
             width: 210mm;
-            height: 297mm;
+            height: auto;
             margin: 0;
             padding: 0;
             overflow: visible;
@@ -410,42 +409,27 @@ export default function Home() {
           /* Resume canvas - properly sized for A4 */
           #resume-canvas,
           .resume-canvas {
-            width: 210mm !important;
+            width: 100% !important;
             height: auto !important;
-            min-height: 297mm !important;
+            min-height: auto !important;
             max-height: none !important;
-            margin: 0 auto !important;
+            margin: 0 !important;
             padding: 0 !important;
             box-shadow: none !important;
-            transform: none !important;
-            transform-origin: unset !important;
-            page-break-after: auto;
-            page-break-inside: avoid;
-            display: block !important;
-            position: relative !important;
+            transform: scale(1) !important;
+            overflow: visible !important;
           }
 
-          /* Template containers - override min-h-screen */
+          /* Template containers - allow natural height */
           .minimal-template,
           .modern-template,
           .professional-template,
           .creative-template {
             width: 100% !important;
             height: auto !important;
-            min-height: 0 !important;
+            min-height: auto !important;
             max-height: none !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            box-sizing: border-box !important;
-          }
-
-          /* Remove excessive padding from template inner containers */
-          .minimal-template > div,
-          .modern-template > div,
-          .professional-template > div,
-          .creative-template > div {
-            padding: 15mm 20mm !important;
-            margin: 0 !important;
+            overflow: visible !important;
           }
 
           /* Hide scrollbars */
@@ -502,46 +486,10 @@ export default function Home() {
             justify-content: flex-start !important;
           }
 
-          /* Preserve gaps */
-          #resume-canvas .gap-1 {
-            gap: 0.25rem !important;
-          }
-
-          #resume-canvas .gap-2 {
-            gap: 0.5rem !important;
-          }
-
-          #resume-canvas .gap-3 {
-            gap: 0.75rem !important;
-          }
-
-          #resume-canvas .gap-4 {
-            gap: 1rem !important;
-          }
-
-          /* Preserve inline-flex elements */
-          #resume-canvas .inline-flex {
-            display: inline-flex !important;
-          }
-
-          /* Ensure icons are visible and sized correctly */
-          #resume-canvas svg {
-            display: inline-block !important;
-            flex-shrink: 0 !important;
-          }
-
-          /* Preserve link styling */
-          #resume-canvas a {
-            color: inherit !important;
-            text-decoration: inherit !important;
-          }
-
-          #resume-canvas a.text-blue-600 {
-            color: #2563eb !important;
-          }
-
-          #resume-canvas a:hover {
-            text-decoration: none !important;
+          /* Ensure colors print */
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
         }
       `}</style>
