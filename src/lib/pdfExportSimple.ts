@@ -30,6 +30,24 @@ export async function exportResumeToPDF(
       message: 'Preparing resume for export...',
     });
 
+    // Show helpful instructions
+    const showInstructions = confirm(
+      '📄 PDF Export Instructions:\n\n' +
+      '1. In the print dialog, select "Save as PDF" as the printer\n' +
+      '2. IMPORTANT: Uncheck "Headers and footers" in More Settings\n' +
+      '3. Click "Save" to download your resume\n\n' +
+      'Click OK to continue...'
+    );
+
+    if (!showInstructions) {
+      onProgress?.({
+        stage: 'error',
+        progress: 0,
+        message: 'Export cancelled',
+      });
+      return;
+    }
+
     // Small delay to show progress
     await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -45,7 +63,7 @@ export async function exportResumeToPDF(
     onProgress?.({
       stage: 'complete',
       progress: 100,
-      message: 'Print dialog opened! Select "Save as PDF" as the destination.',
+      message: 'Print dialog opened! Remember to uncheck "Headers and footers"',
     });
   } catch (error) {
     console.error('PDF Export Error:', error);

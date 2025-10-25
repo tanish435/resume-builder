@@ -27,16 +27,16 @@ body {
 
 /* Print Styles */
 @media print {
+  /* Remove browser default headers and footers */
+  @page {
+    size: A4 portrait;
+    margin: 0;  /* Remove default margins to eliminate header/footer space */
+  }
+  
   /* Hide only UI/editing elements, not content */
   .no-print {
     display: none !important;
     visibility: hidden !important;
-  }
-  
-  /* Strict A4 page size - single page only */
-  @page {
-    size: A4 portrait;
-    margin: 10mm;
   }
   
   html, body {
@@ -49,10 +49,10 @@ body {
     print-color-adjust: exact !important;
   }
   
-  /* Resume canvas - fit exactly to A4 */
+  /* Resume canvas - fit exactly to A4 with custom margins */
   #resume-canvas {
-    width: 190mm !important; /* 210mm - 20mm margins */
-    max-height: 277mm !important; /* 297mm - 20mm margins */
+    width: 210mm !important;
+    max-height: 297mm !important;
     min-height: auto !important;
     height: auto !important;
     overflow: hidden !important; /* Clip content that doesn't fit */
@@ -60,9 +60,10 @@ body {
     box-shadow: none !important;
     transform: none !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 10mm !important; /* Internal padding for content */
     page-break-after: avoid !important;
     page-break-inside: avoid !important;
+    box-sizing: border-box !important;
   }
   
   /* Ensure all content is visible within bounds */
