@@ -228,10 +228,11 @@ export function SectionHeader({
   return (
     <div className={`section-header mb-4 ${divider ? 'pb-2 border-b-2' : ''}`}>
       <h2
-        className="text-2xl font-bold uppercase tracking-wide"
+        className="font-bold uppercase tracking-wide"
         style={{
           color: style.primaryColor || '#1f2937',
           borderColor: style.primaryColor || '#1f2937',
+          fontSize: `${style.fontSizes?.sectionTitle ?? 18}px`,
         }}
       >
         {title}

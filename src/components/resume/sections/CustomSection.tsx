@@ -3,6 +3,7 @@
 import { Section, StyleConfig, CustomSectionData } from '@/types/schema';
 import EditableContent from '../EditableContent';
 import { FileText } from 'lucide-react';
+import { getFontSizeStyle, DEFAULT_FONT_SIZES } from '@/lib/fontSizeUtils';
 
 interface CustomSectionProps {
   section: Section;
@@ -20,8 +21,12 @@ export default function CustomSection({ section, style }: CustomSectionProps) {
     <div className="custom-section">
       {/* Section Title */}
       <h2
-        className="text-2xl font-bold mb-4 pb-2 border-b-2 flex items-center gap-2"
-        style={{ color: style.primaryColor, borderColor: style.primaryColor }}
+        className="font-bold mb-4 pb-2 border-b-2 flex items-center gap-2 uppercase tracking-wide"
+        style={{ 
+          color: style.primaryColor, 
+          borderColor: style.primaryColor,
+          fontSize: `${style.fontSizes?.sectionTitle ?? 18}px`
+        }}
       >
         <FileText className="w-6 h-6" />
         <EditableContent
@@ -42,11 +47,15 @@ export default function CustomSection({ section, style }: CustomSectionProps) {
         multiline
         as="div"
         className="text-gray-700 leading-relaxed"
+        style={getFontSizeStyle(style, 'body', DEFAULT_FONT_SIZES.body)}
       />
 
       {/* Custom Entries (if structured data) */}
       {data.entries && data.entries.length > 0 && (
-        <div className="space-y-3 mt-4">
+        <div 
+          className="space-y-3 mt-4"
+          style={getFontSizeStyle(style, 'body', DEFAULT_FONT_SIZES.body)}
+        >
           {data.entries.map((entry) => (
             <div key={entry.id} className="custom-entry p-3 bg-gray-50 rounded">
               {Object.entries(entry)

@@ -18,6 +18,7 @@ import {
 } from '@/store/slices/styleSlice';
 import ColorPicker from '@/components/ui/ColorPicker';
 import FontSelector from '@/components/ui/FontSelector';
+import FontSizeControls from '@/components/ui/FontSizeControls';
 import SpacingControls from '@/components/ui/SpacingControls';
 import BorderStyler from '@/components/ui/BorderStyler';
 import ThemePresets from '@/components/ui/ThemePresets';
@@ -173,11 +174,23 @@ export default function StyleCustomizer() {
                     )}
 
                     {section.id === 'typography' && (
-                      <div className="pt-4">
-                        <FontSelector
-                          value={currentStyle.fontFamily}
-                          onChange={(font) => dispatch(updateFontFamily(font))}
-                        />
+                      <div className="space-y-4 pt-4">
+                        <div>
+                          <h5 className="text-xs font-semibold text-gray-700 mb-3">
+                            Font Family
+                          </h5>
+                          <FontSelector
+                            value={currentStyle.fontFamily}
+                            onChange={(font) => dispatch(updateFontFamily(font))}
+                          />
+                        </div>
+                        
+                        <div className="pt-3 border-t border-gray-200">
+                          <h5 className="text-xs font-semibold text-gray-700 mb-3">
+                            Font Sizes
+                          </h5>
+                          <FontSizeControls fontSizes={currentStyle.fontSizes} />
+                        </div>
                       </div>
                     )}
 

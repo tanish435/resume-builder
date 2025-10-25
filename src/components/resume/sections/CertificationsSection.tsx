@@ -2,6 +2,7 @@
 
 import { Section, StyleConfig, CertificationsData } from '@/types/schema';
 import { Award, ExternalLink, Calendar } from 'lucide-react';
+import { getFontSizeStyle, DEFAULT_FONT_SIZES } from '@/lib/fontSizeUtils';
 
 interface CertificationsSectionProps {
   section: Section;
@@ -19,8 +20,12 @@ export default function CertificationsSection({ section, style }: Certifications
     <div className="certifications-section">
       {/* Section Title */}
       <h2
-        className="text-2xl font-bold mb-4 pb-2 border-b-2 flex items-center gap-2"
-        style={{ color: style.primaryColor, borderColor: style.primaryColor }}
+        className="font-bold mb-4 pb-2 border-b-2 flex items-center gap-2 uppercase tracking-wide"
+        style={{ 
+          color: style.primaryColor, 
+          borderColor: style.primaryColor,
+          fontSize: `${style.fontSizes?.sectionTitle ?? 18}px`
+        }}
       >
         <Award className="w-6 h-6" />
         Certifications
@@ -36,7 +41,12 @@ export default function CertificationsSection({ section, style }: Certifications
                 <div className="flex-1">
                   {/* Certification Name */}
                   <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-semibold">{entry.name}</h3>
+                    <h3 
+                      className="font-semibold"
+                      style={getFontSizeStyle(style, 'jobPosition', DEFAULT_FONT_SIZES.jobPosition)}
+                    >
+                      {entry.name}
+                    </h3>
                     {entry.url && (
                       <a
                         href={entry.url}
@@ -51,11 +61,19 @@ export default function CertificationsSection({ section, style }: Certifications
                   </div>
 
                   {/* Issuer */}
-                  <p className="text-gray-700 font-medium">{entry.issuer}</p>
+                  <p 
+                    className="text-gray-700 font-medium"
+                    style={getFontSizeStyle(style, 'company', DEFAULT_FONT_SIZES.company)}
+                  >
+                    {entry.issuer}
+                  </p>
 
                   {/* Credential ID */}
                   {entry.credentialId && (
-                    <p className="text-sm text-gray-600">
+                    <p 
+                      className="text-gray-600"
+                      style={getFontSizeStyle(style, 'small', DEFAULT_FONT_SIZES.small)}
+                    >
                       Credential ID: {entry.credentialId}
                     </p>
                   )}
@@ -63,7 +81,10 @@ export default function CertificationsSection({ section, style }: Certifications
 
                 {/* Date */}
                 {entry.date && (
-                  <div className="text-sm text-gray-600 flex items-center gap-1">
+                  <div 
+                    className="text-gray-600 flex items-center gap-1"
+                    style={getFontSizeStyle(style, 'small', DEFAULT_FONT_SIZES.small)}
+                  >
                     <Calendar className="w-4 h-4" />
                     <span>{entry.date}</span>
                   </div>
@@ -72,7 +93,10 @@ export default function CertificationsSection({ section, style }: Certifications
 
               {/* Expiry Date */}
               {entry.expiryDate && (
-                <p className="text-sm text-gray-600 mt-1">
+                <p 
+                  className="text-gray-600 mt-1"
+                  style={getFontSizeStyle(style, 'small', DEFAULT_FONT_SIZES.small)}
+                >
                   Expires: {entry.expiryDate}
                 </p>
               )}

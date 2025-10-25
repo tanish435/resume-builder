@@ -24,12 +24,23 @@ export interface StyleConfig {
   textColor?: string;
   backgroundColor?: string;
   fontFamily: string;
-  fontSize: number;
+  fontSize: number; // Base/body font size (backward compatibility)
   lineHeight: number;
   spacing: 'compact' | 'normal' | 'relaxed';
   borderStyle?: 'none' | 'solid' | 'dashed';
   borderColor?: string;
   accentColor?: string;
+  
+  // Granular font sizes (optional for backward compatibility)
+  fontSizes?: {
+    name?: number;          // Main name/title in header
+    jobTitle?: number;      // Job title/headline
+    sectionTitle?: number;  // Section headings (Experience, Education, etc.)
+    jobPosition?: number;   // Position/role titles in experience
+    company?: number;       // Company names
+    body?: number;          // Regular body text
+    small?: number;         // Small text (dates, locations)
+  };
 }
 
 // ============================================

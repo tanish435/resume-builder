@@ -22,6 +22,15 @@ const defaultStyle: StyleConfig = {
   lineHeight: 1.5,
   spacing: 'normal',
   accentColor: '#60a5fa',
+  fontSizes: {
+    name: 32,
+    jobTitle: 16,
+    sectionTitle: 18,
+    jobPosition: 14,
+    company: 13,
+    body: 11,
+    small: 10,
+  },
 };
 
 const initialState: StyleState = {
@@ -77,6 +86,17 @@ const styleSlice = createSlice({
 
     updateFontSize: (state, action: PayloadAction<number>) => {
       state.currentStyle.fontSize = action.payload;
+      state.activePresetId = null;
+    },
+
+    updateIndividualFontSize: (
+      state,
+      action: PayloadAction<{ key: keyof NonNullable<StyleConfig['fontSizes']>; value: number }>
+    ) => {
+      if (!state.currentStyle.fontSizes) {
+        state.currentStyle.fontSizes = {};
+      }
+      state.currentStyle.fontSizes[action.payload.key] = action.payload.value;
       state.activePresetId = null;
     },
 
@@ -185,6 +205,7 @@ export const {
   updateAccentColor,
   updateFontFamily,
   updateFontSize,
+  updateIndividualFontSize,
   updateLineHeight,
   updateSpacing,
   updateBorderStyle,

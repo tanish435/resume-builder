@@ -2,6 +2,7 @@
 
 import { Section, StyleConfig, LanguagesData } from '@/types/schema';
 import { Languages } from 'lucide-react';
+import { getFontSizeStyle, DEFAULT_FONT_SIZES } from '@/lib/fontSizeUtils';
 
 interface LanguagesSectionProps {
   section: Section;
@@ -31,8 +32,12 @@ export default function LanguagesSection({ section, style }: LanguagesSectionPro
     <div className="languages-section">
       {/* Section Title */}
       <h2
-        className="text-2xl font-bold mb-4 pb-2 border-b-2 flex items-center gap-2"
-        style={{ color: style.primaryColor, borderColor: style.primaryColor }}
+        className="font-bold mb-4 pb-2 border-b-2 flex items-center gap-2 uppercase tracking-wide"
+        style={{ 
+          color: style.primaryColor, 
+          borderColor: style.primaryColor,
+          fontSize: `${style.fontSizes?.sectionTitle ?? 18}px`
+        }}
       >
         <Languages className="w-6 h-6" />
         Languages
@@ -42,16 +47,21 @@ export default function LanguagesSection({ section, style }: LanguagesSectionPro
       <div className="space-y-3">
         {data.entries && data.entries.length > 0 ? (
           data.entries.map((entry) => (
-            <div key={entry.id} className="language-entry flex items-center justify-between">
+            <div 
+              key={entry.id} 
+              className="language-entry flex items-center justify-between"
+              style={getFontSizeStyle(style, 'body', DEFAULT_FONT_SIZES.body)}
+            >
               {/* Language Name */}
               <span className="font-medium text-gray-800">{entry.language}</span>
 
               {/* Proficiency Badge */}
               <span
                 className={`
-                  px-3 py-1 rounded-full text-sm text-white
+                  px-3 py-1 rounded-full text-white
                   ${getProficiencyColor(entry.proficiency)}
                 `}
+                style={getFontSizeStyle(style, 'small', DEFAULT_FONT_SIZES.small)}
               >
                 {entry.proficiency}
               </span>

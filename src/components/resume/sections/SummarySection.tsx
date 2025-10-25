@@ -2,6 +2,7 @@
 
 import { Section, StyleConfig, SummaryData } from '@/types/schema';
 import EditableContent from '../EditableContent';
+import { getFontSizeStyle, DEFAULT_FONT_SIZES } from '@/lib/fontSizeUtils';
 
 interface SummarySectionProps {
   section: Section;
@@ -19,8 +20,12 @@ export default function SummarySection({ section, style }: SummarySectionProps) 
     <div className="summary-section">
       {/* Section Title */}
       <h2
-        className="text-2xl font-bold mb-3 pb-2 border-b-2"
-        style={{ color: style.primaryColor, borderColor: style.primaryColor }}
+        className="font-bold mb-3 pb-2 border-b-2 uppercase tracking-wide"
+        style={{ 
+          color: style.primaryColor, 
+          borderColor: style.primaryColor,
+          fontSize: `${style.fontSizes?.sectionTitle ?? 18}px`
+        }}
       >
         Professional Summary
       </h2>
@@ -34,6 +39,7 @@ export default function SummarySection({ section, style }: SummarySectionProps) 
         multiline
         as="p"
         className="text-gray-700 leading-relaxed"
+        style={getFontSizeStyle(style, 'body', DEFAULT_FONT_SIZES.body)}
       />
     </div>
   );

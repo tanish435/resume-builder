@@ -6,6 +6,7 @@ import { Mail, Phone, MapPin, Linkedin, Github, Globe, X, Plus } from 'lucide-re
 import { useAppDispatch } from '@/store/hooks';
 import { updateSection } from '@/store/slices/resumeSlice';
 import { useState } from 'react';
+import { getFontSizeStyle, DEFAULT_FONT_SIZES } from '@/lib/fontSizeUtils';
 
 interface PersonalInfoSectionProps {
   section: Section;
@@ -62,8 +63,11 @@ export default function PersonalInfoSection({ section, style }: PersonalInfoSect
         value={data.fullName || ''}
         placeholder="Your Full Name"
         as="h1"
-        className="text-4xl font-bold mb-2"
-        style={{ color: style.primaryColor }}
+        className="font-bold mb-2"
+        style={{ 
+          color: style.primaryColor,
+          ...getFontSizeStyle(style, 'name', DEFAULT_FONT_SIZES.name)
+        }}
       />
 
       {/* Job Title */}
@@ -74,12 +78,16 @@ export default function PersonalInfoSection({ section, style }: PersonalInfoSect
           value={data.title}
           placeholder="Your Job Title"
           as="h2"
-          className="text-xl text-gray-600 mb-4"
+          className="text-gray-600 mb-4"
+          style={getFontSizeStyle(style, 'jobTitle', DEFAULT_FONT_SIZES.jobTitle)}
         />
       )}
 
       {/* Contact Information */}
-      <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-700">
+      <div 
+        className="flex flex-wrap items-center justify-center gap-4 text-gray-700"
+        style={getFontSizeStyle(style, 'small', DEFAULT_FONT_SIZES.small)}
+      >
         {/* Email */}
         {data.email && (
           <div className="flex items-center gap-1">

@@ -1,18 +1,22 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { setMode, setActiveSection } from '@/store/slices/editorSlice';
 import TemplateLoader from '../templates/TemplateLoader';
 import ZoomControls from '../ui/ZoomControls';
+import { PageFitIndicator } from '../ui/PageFitIndicator';
+import { setupAutoOptimization, A4_WIDTH, A4_HEIGHT } from '@/lib/singlePageOptimizer';
 
 /**
  * Main Resume Canvas Component
- * Renders the active template with A4 dimensions and zoom controls
+ * Renders the active template with A4 dimensions and auto-optimization for single page
  */
 export default function ResumeCanvas() {
   const dispatch = useAppDispatch();
   const canvasRef = useRef<HTMLDivElement>(null);
+  const [contentHeight, setContentHeight] = useState(A4_HEIGHT);
+  const [compressionLevel, setCompressionLevel] = useState<'comfortable' | 'slight' | 'moderate' | 'heavy'>('comfortable');
 
   // Redux state
   const { currentResume, sections } = useAppSelector((state) => state.resume);
@@ -20,9 +24,27 @@ export default function ResumeCanvas() {
   const { currentStyle } = useAppSelector((state) => state.style);
   const { activeTemplateId } = useAppSelector((state) => state.template);
 
-  // A4 dimensions at 96 DPI
-  const A4_WIDTH = 794; // pixels
-  const A4_HEIGHT = 1123; // pixels
+  // Setup auto-optimization for single page
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    
+    const cleanup = setupAutoOptimization('resume-canvas', (settings) => {
+      console.log('Resume optimized:', settings);
+      
+      // Update indicator state
+      const height = canvasRef.current?.scrollHeight || A4_HEIGHT;
+      setContentHeight(height);
+      
+      // Determine compression level
+      const ratio = A4_HEIGHT / height;
+      if (ratio >= 1.0) setCompressionLevel('comfortable');
+      else if (ratio >= 0.85) setCompressionLevel('slight');
+      else if (ratio >= 0.70) setCompressionLevel('moderate');
+      else setCompressionLevel('heavy');
+    });
+    
+    return cleanup;
+  }, [sections, currentResume, activeTemplateId]);
 
   // Switch to view mode when clicking outside canvas
   useEffect(() => {
@@ -55,6 +77,12 @@ export default function ResumeCanvas() {
       <div className="absolute top-4 right-4 z-10 no-print">
         <ZoomControls />
       </div>
+
+      {/* Page Fit Indicator */}
+      <PageFitIndicator 
+        contentHeight={contentHeight} 
+        compressionLevel={compressionLevel}
+      />
 
       {/* Canvas Container with Scroll */}
       <div className="flex items-center justify-center min-h-full p-8">

@@ -5,6 +5,7 @@ import EditableContent from '../EditableContent';
 import { Briefcase, MapPin, Calendar, Plus, Trash2 } from 'lucide-react';
 import { useAppDispatch } from '@/store/hooks';
 import { updateSection } from '@/store/slices/resumeSlice';
+import { getFontSizeStyle, DEFAULT_FONT_SIZES } from '@/lib/fontSizeUtils';
 
 interface ExperienceSectionProps {
   section: Section;
@@ -66,8 +67,12 @@ export default function ExperienceSection({ section, style }: ExperienceSectionP
       {/* Section Title with Add Button */}
       <div className="flex justify-between items-center mb-4">
         <h2
-          className="text-2xl font-bold pb-2 border-b-2 flex items-center gap-2 flex-1"
-          style={{ color: style.primaryColor, borderColor: style.primaryColor }}
+          className="font-bold pb-2 border-b-2 flex items-center gap-2 flex-1 uppercase tracking-wide"
+          style={{ 
+            color: style.primaryColor, 
+            borderColor: style.primaryColor,
+            fontSize: `${style.fontSizes?.sectionTitle ?? 18}px`
+          }}
         >
           <Briefcase className="w-6 h-6" />
           Work Experience
@@ -113,7 +118,8 @@ export default function ExperienceSection({ section, style }: ExperienceSectionP
                     value={entry.position}
                     placeholder="Position Title"
                     as="h3"
-                    className="text-lg font-semibold"
+                    className="font-semibold"
+                    style={getFontSizeStyle(style, 'jobPosition', DEFAULT_FONT_SIZES.jobPosition)}
                   />
 
                   {/* Company */}
@@ -124,11 +130,15 @@ export default function ExperienceSection({ section, style }: ExperienceSectionP
                     placeholder="Company Name"
                     as="p"
                     className="text-gray-700 font-medium"
+                    style={getFontSizeStyle(style, 'company', DEFAULT_FONT_SIZES.company)}
                   />
                 </div>
 
                 {/* Dates */}
-                <div className="text-sm text-gray-600 flex items-center gap-1">
+                <div 
+                  className="text-gray-600 flex items-center gap-1"
+                  style={getFontSizeStyle(style, 'small', DEFAULT_FONT_SIZES.small)}
+                >
                   <Calendar className="w-4 h-4" />
                   <EditableContent
                     sectionId={section.id}
@@ -152,7 +162,10 @@ export default function ExperienceSection({ section, style }: ExperienceSectionP
 
               {/* Location */}
               {entry.location && (
-                <div className="flex items-center gap-1 text-sm text-gray-600 mb-2">
+                <div 
+                  className="flex items-center gap-1 text-gray-600 mb-2"
+                  style={getFontSizeStyle(style, 'small', DEFAULT_FONT_SIZES.small)}
+                >
                   <MapPin className="w-4 h-4" />
                   <EditableContent
                     sectionId={section.id}
@@ -174,12 +187,16 @@ export default function ExperienceSection({ section, style }: ExperienceSectionP
                   multiline
                   as="p"
                   className="text-gray-700 mb-2"
+                  style={getFontSizeStyle(style, 'body', DEFAULT_FONT_SIZES.body)}
                 />
               )}
 
               {/* Highlights */}
               {entry.highlights && entry.highlights.length > 0 && (
-                <ul className="list-disc list-inside space-y-1 text-gray-700 ml-2">
+                <ul 
+                  className="list-disc list-inside space-y-1 text-gray-700 ml-2"
+                  style={getFontSizeStyle(style, 'body', DEFAULT_FONT_SIZES.body)}
+                >
                   {entry.highlights.map((highlight, idx) => (
                     <li key={idx}>{highlight}</li>
                   ))}

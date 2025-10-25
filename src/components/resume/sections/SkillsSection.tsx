@@ -5,6 +5,7 @@ import { Wrench, Plus, Trash2 } from 'lucide-react';
 import EditableContent from '../EditableContent';
 import { useAppDispatch } from '@/store/hooks';
 import { updateSection } from '@/store/slices/resumeSlice';
+import { getFontSizeStyle, DEFAULT_FONT_SIZES } from '@/lib/fontSizeUtils';
 
 interface SkillsSectionProps {
   section: Section;
@@ -112,8 +113,12 @@ export default function SkillsSection({ section, style }: SkillsSectionProps) {
       {/* Section Title with Add Button */}
       <div className="flex justify-between items-center mb-4">
         <h2
-          className="text-2xl font-bold pb-2 border-b-2 flex items-center gap-2 flex-1"
-          style={{ color: style.primaryColor, borderColor: style.primaryColor }}
+          className="font-bold pb-2 border-b-2 flex items-center gap-2 flex-1 uppercase tracking-wide"
+          style={{ 
+            color: style.primaryColor, 
+            borderColor: style.primaryColor,
+            fontSize: `${style.fontSizes?.sectionTitle ?? 18}px`
+          }}
         >
           <Wrench className="w-6 h-6" />
           Skills
@@ -157,10 +162,14 @@ export default function SkillsSection({ section, style }: SkillsSectionProps) {
                 placeholder="Category Name"
                 as="h3"
                 className="font-semibold text-gray-800 mb-2"
+                style={getFontSizeStyle(style, 'company', DEFAULT_FONT_SIZES.company)}
               />
 
               {/* Skills */}
-              <div className="flex flex-wrap gap-2 mb-2">
+              <div 
+                className="flex flex-wrap gap-2 mb-2"
+                style={getFontSizeStyle(style, 'body', DEFAULT_FONT_SIZES.body)}
+              >
                 {category.skills.map((skill, idx) => (
                   <span
                     key={idx}

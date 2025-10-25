@@ -36,7 +36,7 @@ export default function ModernTemplate({ resume, sections, style }: TemplateProp
       }}
     >
       {/* Template Container */}
-      <div className="px-16 py-12 max-w-4xl mx-auto w-full flex-1">
+      <div className="px-7 py-5 max-w-4xl mx-auto w-full flex-1">
         {/* Header Section - Personal Info */}
         {personalInfoSection && (
           <div className="header-section mb-12">
@@ -49,14 +49,7 @@ export default function ModernTemplate({ resume, sections, style }: TemplateProp
           {contentSections.length > 0 ? (
             contentSections.map((section, index) => (
               <div key={section.id}>
-                {index > 0 && (
-                  <div
-                    className="my-8 h-px"
-                    style={{
-                      background: `linear-gradient(to right, ${style.primaryColor || '#2563eb'}40, transparent)`,
-                    }}
-                  ></div>
-                )}
+
                 {BaseTemplateUtils.renderSection(section, style)}
               </div>
             ))

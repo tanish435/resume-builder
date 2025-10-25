@@ -5,6 +5,7 @@ import EditableContent from '../EditableContent';
 import { GraduationCap, MapPin, Calendar, Plus, Trash2 } from 'lucide-react';
 import { useAppDispatch } from '@/store/hooks';
 import { updateSection } from '@/store/slices/resumeSlice';
+import { getFontSizeStyle, DEFAULT_FONT_SIZES } from '@/lib/fontSizeUtils';
 
 interface EducationSectionProps {
   section: Section;
@@ -68,8 +69,12 @@ export default function EducationSection({ section, style }: EducationSectionPro
       {/* Section Title with Add Button */}
       <div className="flex justify-between items-center mb-4">
         <h2
-          className="text-2xl font-bold pb-2 border-b-2 flex items-center gap-2 flex-1"
-          style={{ color: style.primaryColor, borderColor: style.primaryColor }}
+          className="font-bold pb-2 border-b-2 flex items-center gap-2 flex-1 uppercase tracking-wide"
+          style={{ 
+            color: style.primaryColor, 
+            borderColor: style.primaryColor,
+            fontSize: `${style.fontSizes?.sectionTitle ?? 18}px`
+          }}
         >
           <GraduationCap className="w-6 h-6" />
           Education
@@ -115,7 +120,8 @@ export default function EducationSection({ section, style }: EducationSectionPro
                     value={entry.degree}
                     placeholder="Degree Title"
                     as="h3"
-                    className="text-lg font-semibold"
+                    className="font-semibold"
+                    style={getFontSizeStyle(style, 'jobPosition', DEFAULT_FONT_SIZES.jobPosition)}
                   />
 
                   {/* Institution */}
@@ -126,11 +132,15 @@ export default function EducationSection({ section, style }: EducationSectionPro
                     placeholder="Institution Name"
                     as="p"
                     className="text-gray-700 font-medium"
+                    style={getFontSizeStyle(style, 'company', DEFAULT_FONT_SIZES.company)}
                   />
 
                   {/* Field of Study */}
                   {entry.field && (
-                    <div className="flex items-baseline gap-1 text-sm text-gray-600">
+                    <div 
+                      className="flex items-baseline gap-1 text-gray-600"
+                      style={getFontSizeStyle(style, 'small', DEFAULT_FONT_SIZES.small)}
+                    >
                       <span>Field:</span>
                       <EditableContent
                         sectionId={section.id}
@@ -144,7 +154,10 @@ export default function EducationSection({ section, style }: EducationSectionPro
                 </div>
 
                 {/* Dates */}
-                <div className="text-sm text-gray-600 flex items-center gap-1">
+                <div 
+                  className="text-gray-600 flex items-center gap-1"
+                  style={getFontSizeStyle(style, 'small', DEFAULT_FONT_SIZES.small)}
+                >
                   <Calendar className="w-4 h-4" />
                   <EditableContent
                     sectionId={section.id}
