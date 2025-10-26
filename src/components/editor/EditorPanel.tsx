@@ -6,7 +6,6 @@ import SectionManager from './SectionManager';
 import StyleCustomizer from './StyleCustomizer';
 import TemplateSelector from './TemplateSelector';
 import ExportControls from './ExportControls';
-import HistoryControls from './HistoryControls';
 import ResumeSwitcher from './ResumeSwitcher';
 
 type EditorTab = 'sections' | 'style' | 'templates' | 'export';
@@ -55,9 +54,6 @@ export default function EditorPanel({ className = '' }: EditorPanelProps) {
           <ResumeSwitcher />
         </div>
       )}
-
-      {/* History Controls */}
-      {!isCollapsed && <div className="flex-shrink-0"><HistoryControls /></div>}
 
       {/* Tabs */}
       <div className={`flex ${isCollapsed ? 'flex-col' : 'flex-row'} border-b border-gray-200 flex-shrink-0`}>

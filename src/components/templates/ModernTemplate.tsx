@@ -39,13 +39,13 @@ export default function ModernTemplate({ resume, sections, style }: TemplateProp
       <div className="px-7 py-5 max-w-4xl mx-auto w-full flex-1">
         {/* Header Section - Personal Info */}
         {personalInfoSection && (
-          <div className="header-section mb-12">
+          <div className="header-section mb-">
             {BaseTemplateUtils.renderSection(personalInfoSection, style)}
           </div>
         )}
 
         {/* Main Content Sections */}
-        <div className="main-content space-y-8">
+        <div className="main-content space-y-4">
           {contentSections.length > 0 ? (
             contentSections.map((section, index) => (
               <div key={section.id}>

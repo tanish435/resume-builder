@@ -63,7 +63,7 @@ export default function PersonalInfoSection({ section, style }: PersonalInfoSect
         value={data.fullName || ''}
         placeholder="Your Full Name"
         as="h1"
-        className="font-bold mb-2"
+        className="font-bold"
         style={{ 
           color: style.primaryColor,
           ...getFontSizeStyle(style, 'name', DEFAULT_FONT_SIZES.name)
@@ -78,7 +78,7 @@ export default function PersonalInfoSection({ section, style }: PersonalInfoSect
           value={data.title}
           placeholder="Your Job Title"
           as="h2"
-          className="text-gray-600 mb-4"
+          className="text-gray-600"
           style={getFontSizeStyle(style, 'jobTitle', DEFAULT_FONT_SIZES.jobTitle)}
         />
       )}
@@ -132,20 +132,20 @@ export default function PersonalInfoSection({ section, style }: PersonalInfoSect
       </div>
 
       {/* Social Links */}
-      <div className="mt-3">
+      <div className="">
         <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
           {/* LinkedIn */}
           {data.linkedin && (
-            <div className="group/link relative inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-              <Linkedin className="w-4 h-4 text-blue-600" />
-              <EditableContent
-                sectionId={section.id}
-                fieldPath="data.linkedin"
-                value={data.linkedin}
-                placeholder="https://linkedin.com/in/username"
-                as="span"
-                className="text-blue-600"
-              />
+            <div className="group/link relative inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+              <Linkedin className="w-4 h-4 text-gray-700" />
+              <a
+                href={data.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-700 hover:underline"
+              >
+                LinkedIn
+              </a>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -163,14 +163,14 @@ export default function PersonalInfoSection({ section, style }: PersonalInfoSect
           {data.github && (
             <div className="group/link relative inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
               <Github className="w-4 h-4 text-gray-700" />
-              <EditableContent
-                sectionId={section.id}
-                fieldPath="data.github"
-                value={data.github}
-                placeholder="https://github.com/username"
-                as="span"
-                className="text-gray-700"
-              />
+              <a
+                href={data.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-700 hover:underline"
+              >
+                GitHub
+              </a>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -188,14 +188,14 @@ export default function PersonalInfoSection({ section, style }: PersonalInfoSect
           {data.website && (
             <div className="group/link relative inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
               <Globe className="w-4 h-4 text-gray-700" />
-              <EditableContent
-                sectionId={section.id}
-                fieldPath="data.website"
-                value={data.website}
-                placeholder="https://yourportfolio.com"
-                as="span"
-                className="text-gray-700"
-              />
+              <a
+                href={data.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-700 hover:underline"
+              >
+                Portfolio
+              </a>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -224,7 +224,7 @@ export default function PersonalInfoSection({ section, style }: PersonalInfoSect
           )}
 
           {showAddLinks && (
-            <div className="mt-3 space-y-2 max-w-md mx-auto">
+            <div className="mt-1 space-y-2 max-w-md mx-auto">
               {!data.linkedin && (
                 <form
                   onSubmit={(e) => {

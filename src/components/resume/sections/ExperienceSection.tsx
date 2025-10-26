@@ -65,7 +65,7 @@ export default function ExperienceSection({ section, style }: ExperienceSectionP
   return (
     <div className="experience-section">
       {/* Section Title with Add Button */}
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-">
         <h2
           className="font-bold pb-2 border-b-2 flex items-center gap-2 flex-1 uppercase tracking-wide"
           style={{ 

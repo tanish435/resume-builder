@@ -117,7 +117,7 @@ export default function ProjectsSection({ section, style }: ProjectsSectionProps
   return (
     <div className="projects-section">
       {/* Section Title with Add Button */}
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center ">
         <h2
           className="font-bold pb-2 border-b-2 flex items-center gap-2 flex-1 uppercase tracking-wide"
           style={{ 
@@ -144,7 +144,7 @@ export default function ProjectsSection({ section, style }: ProjectsSectionProps
       </div>
 
       {/* Project Entries */}
-      <div className="space-y-5">
+      <div className="space-y-1">
         {data.entries && data.entries.length > 0 ? (
           data.entries.map((entry, index) => (
             <div key={entry.id} className="project-entry relative group">
@@ -161,10 +161,10 @@ export default function ProjectsSection({ section, style }: ProjectsSectionProps
               </button>
 
               {/* Header Row */}
-              <div className="flex justify-between items-start mb-2">
+              <div className="flex justify-between items-start mb-1">
                 <div className="flex-1">
                   {/* Project Name */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-">
                     <EditableContent
                       sectionId={section.id}
                       fieldPath={`data.entries[${index}].name`}

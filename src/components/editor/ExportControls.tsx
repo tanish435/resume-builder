@@ -12,7 +12,6 @@ import {
 import ShareButton from './ShareButton';
 import { setResume } from '@/store/slices/resumeSlice';
 import { setStyle } from '@/store/slices/styleSlice';
-import { initializeHistory } from '@/store/slices/historySlice';
 
 /**
  * Export Controls Component
@@ -24,7 +23,7 @@ export default function ExportControls() {
   const { currentStyle } = useAppSelector((state) => state.style);
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState<ExportProgress | null>(null);
-  const [exportQuality, setExportQuality] = useState<'high' | 'standard' | 'fast'>('standard');
+  const [exportQuality, setExportQuality] = useState<'highQuality' | 'standard' | 'fast'>('standard');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePrint = () => {
@@ -161,14 +160,6 @@ export default function ExportControls() {
           dispatch(setStyle(data.style));
         }
 
-        // Initialize history with loaded data
-        dispatch(initializeHistory({
-          resume: data.resume,
-          sections: data.sections,
-          style: data.style || currentStyle,
-          template: data.resume.templateId,
-        }));
-
         alert('✅ Resume loaded successfully!');
       } catch (error) {
         console.error('Load failed:', error);
@@ -243,9 +234,9 @@ export default function ExportControls() {
                 Standard
               </button>
               <button
-                onClick={() => setExportQuality('high')}
+                onClick={() => setExportQuality('highQuality')}
                 className={`flex-1 px-3 py-1.5 text-xs rounded ${
-                  exportQuality === 'high'
+                  exportQuality === 'highQuality'
                     ? 'bg-blue-100 text-blue-700 font-semibold'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}

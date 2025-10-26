@@ -7,7 +7,6 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setResume } from '@/store/slices/resumeSlice';
 import { setActiveTemplate } from '@/store/slices/templateSlice';
 import { setStyle } from '@/store/slices/styleSlice';
-import { initializeHistory } from '@/store/slices/historySlice';
 import ResumeCanvas from '@/components/resume/ResumeCanvas';
 import EditorPanel from '@/components/editor/EditorPanel';
 import { LoadingSpinner } from '@/components/ui/Loading';
@@ -28,7 +27,6 @@ export default function Home() {
   const currentResume = useAppSelector((state) => state.resume.currentResume);
   const currentStyle = useAppSelector((state) => state.style.currentStyle);
   const activeTemplateId = useAppSelector((state) => state.template.activeTemplateId);
-  const historyInitialized = useAppSelector((state) => state.history.present !== null);
   
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -270,18 +268,6 @@ export default function Home() {
     dispatch(setActiveTemplate('modern'));
     dispatch(setStyle(sampleResume.styleConfig));
   };
-
-  // Initialize history after state is loaded
-  useEffect(() => {
-    if (sections.length > 0 && currentResume && !historyInitialized && !isLoading) {
-      dispatch(initializeHistory({
-        resume: currentResume,
-        sections: sections,
-        style: currentStyle,
-        template: activeTemplateId,
-      }));
-    }
-  }, [dispatch, sections, currentResume, currentStyle, activeTemplateId, historyInitialized, isLoading]);
 
   // Show loading state
   if (status === 'loading' || isLoading) {

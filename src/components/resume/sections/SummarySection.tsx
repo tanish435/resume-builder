@@ -20,7 +20,7 @@ export default function SummarySection({ section, style }: SummarySectionProps) 
     <div className="summary-section">
       {/* Section Title */}
       <h2
-        className="font-bold mb-3 pb-2 border-b-2 uppercase tracking-wide"
+        className="font-bold pb-2 border-b-2 uppercase tracking-wide"
         style={{ 
           color: style.primaryColor, 
           borderColor: style.primaryColor,

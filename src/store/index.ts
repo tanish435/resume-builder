@@ -1,11 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
 import resumeReducer from './slices/resumeSlice';
 import editorReducer from './slices/editorSlice';
-import historyReducer from './slices/historySlice';
 import styleReducer from './slices/styleSlice';
 import templateReducer from './slices/templateSlice';
 import shareReducer from './slices/shareSlice';
-import { historyMiddleware } from './middleware/historyMiddleware';
 import { autoSaveMiddleware } from './middleware/autoSaveMiddleware';
 import { apiSyncMiddleware } from './middleware/apiSyncMiddleware';
 import { styleSyncMiddleware } from './middleware/styleSyncMiddleware';
@@ -14,7 +12,6 @@ export const store = configureStore({
   reducer: {
     resume: resumeReducer,
     editor: editorReducer,
-    history: historyReducer,
     style: styleReducer,
     template: templateReducer,
     share: shareReducer,
@@ -22,16 +19,11 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        // Ignore these action types
-        ignoredActions: ['history/addSnapshot'],
         // Ignore these field paths in all actions
         ignoredActionPaths: ['payload.timestamp', 'payload.data'],
-        // Ignore these paths in the state
-        ignoredPaths: ['history.past', 'history.future'],
       },
     })
       .concat(styleSyncMiddleware)  // Must come before apiSyncMiddleware
-      .concat(historyMiddleware)
       .concat(autoSaveMiddleware)
       .concat(apiSyncMiddleware),
 });
