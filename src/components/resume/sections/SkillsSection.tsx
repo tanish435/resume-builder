@@ -155,44 +155,40 @@ export default function SkillsSection({ section, style }: SkillsSectionProps) {
               </button>
 
               {/* Category Name */}
-              <EditableContent
-                sectionId={section.id}
-                fieldPath={`data.categories[${index}].name`}
-                value={category.name}
-                placeholder="Category Name"
-                as="h3"
-                className="font-semibold text-gray-800 mb-2"
-                style={getFontSizeStyle(style, 'company', DEFAULT_FONT_SIZES.company)}
-              />
-
-              {/* Skills */}
-              <div 
-                className="flex flex-wrap gap-2 mb-2"
-                style={getFontSizeStyle(style, 'body', DEFAULT_FONT_SIZES.body)}
-              >
-                {category.skills.map((skill, idx) => (
-                  <span
-                    key={idx}
-                    className="group/skill px-3 py-1 rounded-full text-sm relative inline-flex items-center gap-1 cursor-pointer hover:opacity-75 transition-opacity"
-                    style={{
-                      backgroundColor: `${style.primaryColor}15`,
-                      color: style.textColor || '#000000',
-                      border: `1px solid ${style.primaryColor}40`,
-                    }}
-                  >
-                    {skill}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteSkill(category.id, idx);
-                      }}
-                      className="no-print ml-1 opacity-0 group-hover/skill:opacity-100 transition-opacity"
-                      title="Remove skill"
-                    >
-                      <Trash2 className="w-3 h-3 text-red-500" />
-                    </button>
-                  </span>
-                ))}
+              <div className="flex items-center justify-center gap-1">
+                <EditableContent
+                  sectionId={section.id}
+                  fieldPath={`data.categories[${index}].name`}
+                  value={category.name}
+                  placeholder="Category Name"
+                  as="span"
+                  className="font-semibold text-gray-800"
+                  style={getFontSizeStyle(style, 'body', DEFAULT_FONT_SIZES.body)}
+                />
+                <span className="font-semibold text-gray-800">:</span>
+                
+                {/* Skills as comma-separated text */}
+                <div 
+                  className="flex-1"
+                  style={getFontSizeStyle(style, 'body', DEFAULT_FONT_SIZES.body)}
+                >
+                  {category.skills.map((skill, idx) => (
+                    <span key={idx} className="group/skill inline">
+                      <span className="text-gray-700">{skill}</span>
+                      {idx < category.skills.length - 1 && <span className="text-gray-700">, </span>}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteSkill(category.id, idx);
+                        }}
+                        className="no-print ml-1 opacity-0 group-hover/skill:opacity-100 transition-opacity"
+                        title="Remove skill"
+                      >
+                        <Trash2 className="w-3 h-3 text-red-500 inline" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
               </div>
 
               {/* Add Skill Input */}
