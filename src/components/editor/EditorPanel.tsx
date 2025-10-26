@@ -32,7 +32,7 @@ export default function EditorPanel({ className = '' }: EditorPanelProps) {
 
   return (
     <div
-      className={`editor-panel no-print bg-white border-r border-gray-200 transition-all duration-300 relative ${
+      className={`editor-panel no-print bg-white border-r border-gray-200 transition-all duration-300 relative flex flex-col ${
         isCollapsed ? 'w-16' : 'w-80'
       } ${className}`}
     >
@@ -51,16 +51,16 @@ export default function EditorPanel({ className = '' }: EditorPanelProps) {
 
       {/* Resume Switcher */}
       {!isCollapsed && (
-        <div className="px-4 pt-4 pb-2">
+        <div className="px-4 pt-4 pb-2 flex-shrink-0">
           <ResumeSwitcher />
         </div>
       )}
 
       {/* History Controls */}
-      {!isCollapsed && <HistoryControls />}
+      {!isCollapsed && <div className="flex-shrink-0"><HistoryControls /></div>}
 
       {/* Tabs */}
-      <div className={`flex ${isCollapsed ? 'flex-col' : 'flex-row'} border-b border-gray-200`}>
+      <div className={`flex ${isCollapsed ? 'flex-col' : 'flex-row'} border-b border-gray-200 flex-shrink-0`}>
         {tabs.map((tab) => {
           const Icon = tab.icon;
           return (
@@ -70,15 +70,15 @@ export default function EditorPanel({ className = '' }: EditorPanelProps) {
                 setActiveTab(tab.id);
                 if (isCollapsed) setIsCollapsed(false);
               }}
-              className={`flex items-center gap-2 px-4 py-3 transition-colors ${
+              className={`flex items-center gap-1.5 px-2 py-3 transition-colors ${
                 activeTab === tab.id
                   ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
                   : 'text-gray-600 hover:bg-gray-50'
               } ${isCollapsed ? 'justify-center w-full' : 'flex-1 justify-center'}`}
               title={tab.label}
             >
-              <Icon className="w-5 h-5" />
-              {!isCollapsed && <span className="text-sm font-medium">{tab.label}</span>}
+              <Icon className="w-4 h-4" />
+              {!isCollapsed && <span className="text-xs font-medium whitespace-nowrap">{tab.label}</span>}
             </button>
           );
         })}
@@ -86,11 +86,13 @@ export default function EditorPanel({ className = '' }: EditorPanelProps) {
 
       {/* Tab Content */}
       {!isCollapsed && (
-        <div className="p-4 overflow-y-auto h-[calc(100vh-120px)]">
-          {activeTab === 'sections' && <SectionManager />}
-          {activeTab === 'style' && <StyleCustomizer />}
-          {activeTab === 'templates' && <TemplateSelector />}
-          {activeTab === 'export' && <ExportControls />}
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <div className="p-4">
+            {activeTab === 'sections' && <SectionManager />}
+            {activeTab === 'style' && <StyleCustomizer />}
+            {activeTab === 'templates' && <TemplateSelector />}
+            {activeTab === 'export' && <ExportControls />}
+          </div>
         </div>
       )}
     </div>
