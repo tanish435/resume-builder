@@ -156,6 +156,13 @@ async function syncFullResume(resume: any, sections: any[]): Promise<void> {
  * Sync resume metadata only (title, template, style)
  */
 async function syncResumeMetadata(resume: any): Promise<void> {
+  console.log('[API Sync] Syncing metadata for resume:', resume.id);
+  console.log('[API Sync] Metadata:', {
+    title: resume.title,
+    templateId: resume.templateId,
+    styleConfig: resume.styleConfig,
+  });
+  
   const response = await fetch(`/api/resumes/${resume.id}/metadata`, {
     method: 'PATCH',
     headers: {
@@ -169,8 +176,13 @@ async function syncResumeMetadata(resume: any): Promise<void> {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to sync resume metadata');
+    const errorText = await response.text();
+    console.error('[API Sync] Failed to sync metadata. Status:', response.status);
+    console.error('[API Sync] Error response:', errorText);
+    throw new Error(`Failed to sync resume metadata: ${response.status} - ${errorText}`);
   }
+  
+  console.log('[API Sync] ✅ Metadata synced successfully!');
 }
 
 /**

@@ -8,24 +8,7 @@ import { authOptions } from '@/lib/auth';
 const MetadataUpdateSchema = z.object({
   title: z.string().min(1, 'Resume title is required').optional(),
   templateId: z.string().optional(),
-  styleConfig: z.object({
-    primaryColor: z.string().optional(),
-    textColor: z.string().optional(),
-    backgroundColor: z.string().optional(),
-    fontFamily: z.string().optional(),
-    fontSize: z.number().optional(),
-    lineHeight: z.number().optional(),
-    margins: z.object({
-      top: z.number().optional(),
-      bottom: z.number().optional(),
-      left: z.number().optional(),
-      right: z.number().optional(),
-    }).optional(),
-    spacing: z.object({
-      section: z.number().optional(),
-      paragraph: z.number().optional(),
-    }).optional(),
-  }).optional(),
+  styleConfig: z.record(z.string(), z.any()).optional(), // Allow any style config properties
   isPublic: z.boolean().optional(),
 });
 

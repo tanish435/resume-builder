@@ -6,7 +6,7 @@ export interface ResumeState {
   sections: Section[];
   isLoading: boolean;
   isSaving: boolean;
-  lastSaved: Date | null;
+  lastSaved: string | null; // ISO string instead of Date object
   hasUnsavedChanges: boolean;
   error: string | null;
 }
@@ -127,7 +127,7 @@ const resumeSlice = createSlice({
     saveCompleted: (state) => {
       state.isSaving = false;
       state.hasUnsavedChanges = false;
-      state.lastSaved = new Date();
+      state.lastSaved = new Date().toISOString();
     },
 
     // Error handling
