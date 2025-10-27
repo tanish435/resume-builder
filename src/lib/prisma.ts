@@ -28,9 +28,6 @@ export async function getUserWithResumes(userId: string) {
     where: { id: userId },
     include: {
       resumes: {
-        include: {
-          template: true,
-        },
         orderBy: {
           updatedAt: 'desc',
         },
@@ -51,7 +48,6 @@ export async function getResumeWithSections(resumeId: string) {
           order: 'asc',
         },
       },
-      template: true,
       user: {
         select: {
           id: true,
@@ -80,7 +76,6 @@ export async function getResumeByShareLink(slug: string) {
               order: 'asc',
             },
           },
-          template: true,
         },
       },
     },
@@ -141,7 +136,6 @@ export async function createResumeWithDefaults(
     },
     include: {
       sections: true,
-      template: true,
     },
   });
 }

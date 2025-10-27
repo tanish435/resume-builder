@@ -173,8 +173,8 @@ export function getAllTemplates(): Template[] {
   return Object.entries(TEMPLATE_METADATA).map(([id, metadata]) => ({
     id,
     ...metadata,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   }));
 }
 

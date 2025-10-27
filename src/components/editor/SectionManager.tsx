@@ -95,8 +95,8 @@ export default function SectionManager() {
       data: getDefaultDataForType(type),
       order: sections.length,
       isVisible: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     dispatch(addSection(newSection));
