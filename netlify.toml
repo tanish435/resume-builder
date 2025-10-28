@@ -1,0 +1,14 @@
+# Netlify Configuration
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Environment variables - DO NOT SET NODE_ENV
+# Netlify automatically sets NODE_ENV=production for builds
+
+[build.environment]
+  # Next.js will use production mode automatically
+  NEXT_TELEMETRY_DISABLED = "1"
